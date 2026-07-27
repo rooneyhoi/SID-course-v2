@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buổi 1 — Framing: Sơ đồ minh hoạ</title>
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #23324a;
+    --ink2: #55617a;
+    --ink3: #8b96ac;
+    /* glass surfaces */
+    --glass: rgba(255,255,255,0.55);
+    --glass-strong: rgba(255,255,255,0.72);
+    --glass-soft: rgba(255,255,255,0.38);
+    --glass-line: rgba(255,255,255,0.75);
+    --glass-line-soft: rgba(255,255,255,0.5);
+    /* neutral fills used inside SVG diagrams */
+    --bg: rgba(255,255,255,0.5);
+    --line: rgba(120,140,180,0.45);
+    /* accent inks — deep enough to read on frosted glass */
+    --blue: #1c5aa8;   --blue-bg: rgba(120,170,235,0.28);   --blue-br: rgba(90,140,210,0.55);
+    --coral: #b0431f;  --coral-bg: rgba(240,150,110,0.28);  --coral-br: rgba(220,120,80,0.55);
+    --teal: #0d7159;   --teal-bg: rgba(95,200,165,0.28);    --teal-br: rgba(50,170,130,0.55);
+    --green: #4a7d16;  --green-bg: rgba(150,200,90,0.30);   --green-br: rgba(110,165,50,0.55);
+    --amber: #955610;  --amber-bg: rgba(240,180,80,0.32);   --amber-br: rgba(220,150,40,0.55);
+    --purple: #443a9a; --purple-bg: rgba(170,160,235,0.32); --purple-br: rgba(130,120,215,0.55);
+    --pink: #a83a63;   --pink-bg: rgba(235,150,180,0.30);   --pink-br: rgba(215,110,150,0.55);
+  }
+  * { box-sizing: border-box; }
+  html { background: #cfd9f2; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--ink); margin: 0; line-height: 1.6;
+    min-height: 100vh;
+    background:
+      radial-gradient(at 12% 8%, rgba(255,196,150,0.55) 0px, transparent 45%),
+      radial-gradient(at 88% 12%, rgba(150,205,255,0.60) 0px, transparent 45%),
+      radial-gradient(at 78% 88%, rgba(190,165,245,0.55) 0px, transparent 45%),
+      radial-gradient(at 18% 92%, rgba(140,230,200,0.50) 0px, transparent 45%),
+      linear-gradient(135deg, #e9f0ff 0%, #f3ecff 50%, #eafaf3 100%);
+    background-attachment: fixed;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 24px 20px 80px; }
+  header { text-align: center; padding: 40px 0 16px; }
+  header h1 { font-size: 28px; font-weight: 700; margin: 0 0 8px; color: var(--ink);
+    text-shadow: 0 1px 2px rgba(255,255,255,0.6); }
+  header p { color: var(--ink2); margin: 0; font-size: 16px; }
+  .nav { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 24px 0 8px; }
+  .nav a {
+    font-size: 13px; text-decoration: none; color: var(--ink2);
+    padding: 7px 14px; border: 1px solid var(--glass-line); border-radius: 20px;
+    background: var(--glass); backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    box-shadow: 0 2px 8px rgba(80,110,170,0.12); transition: all .18s;
+  }
+  .nav a:hover { background: var(--glass-strong); color: var(--ink);
+    box-shadow: 0 4px 14px rgba(80,110,170,0.20); transform: translateY(-1px); }
+  section {
+    background: var(--glass); border: 1px solid var(--glass-line);
+    border-radius: 20px; padding: 28px 28px 32px; margin: 22px 0;
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    box-shadow: 0 8px 32px rgba(70,100,160,0.16), inset 0 1px 0 rgba(255,255,255,0.55);
+  }
+  section h2 { font-size: 20px; font-weight: 700; margin: 0 0 4px; color: var(--ink); }
+  section .sub { color: var(--ink2); font-size: 14px; margin: 0 0 20px; }
+  .diagram { width: 100%; }
+  .caption { font-size: 13px; color: var(--ink2); margin-top: 16px; padding: 14px 16px;
+    background: var(--glass-soft); border: 1px solid var(--glass-line-soft);
+    border-radius: 14px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-left: 3px solid var(--blue-br); }
+  .caption strong { color: var(--ink); }
+  svg { width: 100%; height: auto; display: block; }
+  .t { font-size: 14px; fill: var(--ink); font-weight: 500; }
+  .ts { font-size: 12px; fill: var(--ink2); }
+  .th { font-size: 15px; fill: var(--ink); font-weight: 600; }
+  /* Interactive tabs */
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab { font-size: 13px; padding: 8px 14px; border: 1px solid var(--glass-line);
+    border-radius: 10px; background: var(--glass-soft); cursor: pointer; color: var(--ink2);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 6px rgba(80,110,170,0.10); transition: all .18s; }
+  .tab:hover { background: var(--glass); transform: translateY(-1px); }
+  .tab.active { background: var(--blue-bg); color: var(--blue);
+    border-color: var(--blue-br); font-weight: 600;
+    box-shadow: 0 3px 10px rgba(60,120,200,0.25); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .compare-grid { grid-template-columns: 1fr; } }
+  .prompt-box { padding: 16px; border-radius: 14px; font-size: 13px; line-height: 1.65;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(70,100,160,0.12), inset 0 1px 0 rgba(255,255,255,0.5); }
+  .prompt-bad { background: var(--coral-bg); border: 1px solid var(--coral-br); }
+  .prompt-good { background: var(--teal-bg); border: 1px solid var(--teal-br); }
+  .prompt-box .label { font-weight: 700; font-size: 13px; margin-bottom: 8px; display: block; }
+  .prompt-bad .label { color: var(--coral); }
+  .prompt-good .label { color: var(--teal); }
+  .prompt-box .body { color: var(--ink); font-style: italic; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px;
+    background: var(--glass-soft); border-radius: 14px; overflow: hidden;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 16px rgba(70,100,160,0.12); }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--glass-line-soft); }
+  th { color: var(--ink2); font-weight: 600; background: rgba(255,255,255,0.35); }
+  tr:last-child td { border-bottom: none; }
+  .in-scope { color: var(--teal); font-weight: 500; }
+  .out-scope { color: var(--coral); font-weight: 500; }
+  .quote { font-size: 15px; font-style: italic; color: var(--ink); padding: 16px 20px;
+    background: var(--amber-bg); border: 1px solid var(--amber-br);
+    border-radius: 14px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border-left: 3px solid var(--amber); margin: 16px 0;
+    box-shadow: 0 4px 16px rgba(70,100,160,0.12); }
+  footer { text-align: center; color: var(--ink2); font-size: 13px; padding: 24px 0; }
+  /* Frosted panels behind SVG diagrams so glass reads over the drawings */
+  .glass-stage { background: var(--glass-soft); border: 1px solid var(--glass-line-soft);
+    border-radius: 16px; padding: 8px; margin-top: 4px;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Buổi 1 — Trước khi hỏi AI, hãy nói rõ mình cần gì</h1>
+  <p>Sơ đồ minh hoạ · dành cho người không chuyên công nghệ</p>
+</header>
+
+<div class="nav">
+  <a href="#s1">1. Ẩn dụ giao việc</a>
+  <a href="#s2">2. Hai prompt</a>
+  <a href="#s3">3. Chủ đề ≠ Bài toán</a>
+  <a href="#s4">4. Sáu câu hỏi</a>
+  <a href="#s5">5. Muốn nhận "món" gì?</a>
+  <a href="#s6">6. Cùng nội dung, khác người</a>
+  <a href="#s7">7. Chiếc hộp phạm vi</a>
+  <a href="#s8">8. Sáu chiếc mũ AI</a>
+  <a href="#s9">9. Phiếu giao việc</a>
+</div>
+
+<!-- ============ SECTION 1: METAPHOR ============ -->
+<section id="s1">
+  <h2>1. Dùng AI giống như giao việc cho nhân viên mới</h2>
+  <p class="sub">Nếu bạn không nói rõ, họ phải tự đoán — và thường đoán sai.</p>
+  <div class="glass-stage"><svg viewBox="0 0 680 340" class="diagram">
+    <defs>
+      <marker id="ar1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+    <!-- Left: vague -->
+    <rect x="30" y="40" width="270" height="110" rx="12" fill="var(--coral-bg)" stroke="var(--coral-br)" stroke-width="0.5"/>
+    <text class="th" x="165" y="70" text-anchor="middle" fill="var(--coral)">Bạn nói mơ hồ</text>
+    <text class="ts" x="165" y="98" text-anchor="middle">"Làm cho tôi món gì ngon đi"</text>
+    <text class="ts" x="165" y="120" text-anchor="middle">"Giúp tôi bán hàng tốt hơn"</text>
+    <text class="ts" x="165" y="138" text-anchor="middle" fill="var(--coral)">→ Người mới phải đoán</text>
+
+    <!-- Right: clear -->
+    <rect x="380" y="40" width="270" height="110" rx="12" fill="var(--teal-bg)" stroke="var(--teal-br)" stroke-width="0.5"/>
+    <text class="th" x="515" y="70" text-anchor="middle" fill="var(--teal)">Bạn giao việc rõ</text>
+    <text class="ts" x="515" y="98" text-anchor="middle">"Nấu bữa tối cho 4 người,</text>
+    <text class="ts" x="515" y="116" text-anchor="middle">không cay, ngân sách 200k"</text>
+    <text class="ts" x="515" y="138" text-anchor="middle" fill="var(--teal)">→ Làm đúng ngay</text>
+
+    <!-- Questions the "employee" needs -->
+    <text class="t" x="340" y="195" text-anchor="middle">Người mới (và AI) luôn cần biết:</text>
+    <rect x="60" y="215" width="180" height="34" rx="8" fill="var(--bg)" stroke="var(--line)" stroke-width="0.5"/>
+    <text class="ts" x="150" y="236" text-anchor="middle">Ăn sáng hay ăn tối?</text>
+    <rect x="250" y="215" width="180" height="34" rx="8" fill="var(--bg)" stroke="var(--line)" stroke-width="0.5"/>
+    <text class="ts" x="340" y="236" text-anchor="middle">Cho mấy người?</text>
+    <rect x="440" y="215" width="180" height="34" rx="8" fill="var(--bg)" stroke="var(--line)" stroke-width="0.5"/>
+    <text class="ts" x="530" y="236" text-anchor="middle">Có dị ứng gì không?</text>
+    <rect x="150" y="262" width="180" height="34" rx="8" fill="var(--bg)" stroke="var(--line)" stroke-width="0.5"/>
+    <text class="ts" x="240" y="283" text-anchor="middle">Ngân sách bao nhiêu?</text>
+    <rect x="350" y="262" width="180" height="34" rx="8" fill="var(--bg)" stroke="var(--line)" stroke-width="0.5"/>
+    <text class="ts" x="440" y="283" text-anchor="middle">Ăn ngay hay mang về?</text>
+  </svg></div>
+  <div class="caption">
+    <strong>Ý chính:</strong> AI rất nhanh và giỏi, nhưng không tự biết điều bạn đang nghĩ.
+    "Framing" chỉ đơn giản là cách bạn <strong>giao việc rõ ràng</strong> để AI hiểu đúng vấn đề trước khi bắt tay làm.
+  </div>
+</section>
+
+<!-- ============ SECTION 2: TWO PROMPTS ============ -->
+<section id="s2">
+  <h2>2. Vì sao prompt dài vẫn không hiệu quả?</h2>
+  <p class="sub">Cùng một chủ đề, prompt nào AI dễ làm đúng hơn?</p>
+  <div class="compare-grid">
+    <div class="prompt-box prompt-bad">
+      <span class="label">✗ Prompt A — dài nhưng mơ hồ</span>
+      <span class="body">"Hãy cho tôi tất cả kiến thức về chăm sóc khách hàng, thật chi tiết, chuyên nghiệp và có ví dụ."</span>
+    </div>
+    <div class="prompt-box prompt-good">
+      <span class="label">✓ Prompt B — ngắn nhưng rõ</span>
+      <span class="body">"Tôi cần tổ chức buổi hướng dẫn 90 phút cho 10 nhân viên bán hàng mới. Hãy tạo outline gồm 3 phần: cách chào hỏi, tìm hiểu nhu cầu, xử lý khách đang khó chịu. Không đề cập CRM hay phần mềm."</span>
+    </div>
+  </div>
+  <div class="glass-stage"><svg viewBox="0 0 680 200" class="diagram" style="margin-top:20px">
+    <defs>
+      <marker id="ar2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+    <!-- Row 1: vague -->
+    <rect x="20" y="20" width="140" height="50" rx="8" fill="var(--coral-bg)" stroke="var(--coral-br)" stroke-width="0.5"/>
+    <text class="ts" x="90" y="42" text-anchor="middle" fill="var(--coral)">Prompt dài</text>
+    <text class="ts" x="90" y="58" text-anchor="middle" fill="var(--coral)">nhưng mơ hồ</text>
+    <line x1="160" y1="45" x2="195" y2="45" stroke="var(--coral-br)" stroke-width="1.5" marker-end="url(#ar2)"/>
+    <rect x="200" y="20" width="130" height="50" rx="8" fill="var(--bg)" stroke="var(--line)" stroke-width="0.5"/>
+    <text class="ts" x="265" y="49" text-anchor="middle">AI phải tự đoán</text>
+    <line x1="330" y1="45" x2="365" y2="45" stroke="var(--coral-br)" stroke-width="1.5" marker-end="url(#ar2)"/>
+    <rect x="370" y="20" width="140" height="50" rx="8" fill="var(--bg)" stroke="var(--line)" stroke-width="0.5"/>
+    <text class="ts" x="440" y="49" text-anchor="middle">Nghe có vẻ hay</text>
+    <line x1="510" y1="45" x2="545" y2="45" stroke="var(--coral-br)" stroke-width="1.5" marker-end="url(#ar2)"/>
+    <rect x="550" y="20" width="110" height="50" rx="8" fill="var(--coral-bg)" stroke="var(--coral-br)" stroke-width="0.5"/>
+    <text class="ts" x="605" y="49" text-anchor="middle" fill="var(--coral)">Khó dùng</text>
+
+    <!-- Row 2: clear -->
+    <rect x="20" y="120" width="140" height="50" rx="8" fill="var(--teal-bg)" stroke="var(--teal-br)" stroke-width="0.5"/>
+    <text class="ts" x="90" y="149" text-anchor="middle" fill="var(--teal)">Nhu cầu rõ</text>
+    <line x1="160" y1="145" x2="195" y2="145" stroke="var(--teal-br)" stroke-width="1.5" marker-end="url(#ar2)"/>
+    <rect x="200" y="120" width="130" height="50" rx="8" fill="var(--bg)" stroke="var(--line)" stroke-width="0.5"/>
+    <text class="ts" x="265" y="149" text-anchor="middle">Giao việc rõ</text>
+    <line x1="330" y1="145" x2="365" y2="145" stroke="var(--teal-br)" stroke-width="1.5" marker-end="url(#ar2)"/>
+    <rect x="370" y="120" width="140" height="50" rx="8" fill="var(--bg)" stroke="var(--line)" stroke-width="0.5"/>
+    <text class="ts" x="440" y="149" text-anchor="middle">AI hiểu đúng</text>
+    <line x1="510" y1="145" x2="545" y2="145" stroke="var(--teal-br)" stroke-width="1.5" marker-end="url(#ar2)"/>
+    <rect x="550" y="120" width="110" height="50" rx="8" fill="var(--teal-bg)" stroke="var(--teal-br)" stroke-width="0.5"/>
+    <text class="ts" x="605" y="149" text-anchor="middle" fill="var(--teal)">Dùng được</text>
+  </svg></div>
+  <div class="caption">
+    <strong>Không phải cứ dài là tốt.</strong> Prompt B ngắn hơn nhưng nói rõ: làm cho ai, trong bao lâu, gồm mấy phần, cái gì không cần. AI làm đúng ngay lần đầu.
+  </div>
+</section>
+
+<!-- ============ SECTION 3: TOPIC vs PROBLEM ============ -->
+<section id="s3">
+  <h2>3. Chủ đề chưa phải là bài toán</h2>
+  <p class="sub">"Chăm sóc khách hàng" mới chỉ là nơi bạn đang đứng. Bạn muốn <em>làm gì</em> tại đó mới là bài toán.</p>
+  <div class="glass-stage"><svg viewBox="0 0 680 260" class="diagram">
+    <defs>
+      <marker id="ar3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+    <!-- Top: topic -->
+    <rect x="250" y="20" width="180" height="56" rx="10" fill="var(--blue-bg)" stroke="var(--blue-br)" stroke-width="0.5"/>
+    <text class="th" x="340" y="43" text-anchor="middle" fill="var(--blue)">Chủ đề</text>
+    <text class="ts" x="340" y="63" text-anchor="middle" fill="var(--blue)">Chăm sóc khách hàng</text>
+
+    <!-- lines to 4 problems -->
+    <line x1="300" y1="76" x2="110" y2="140" stroke="var(--ink3)" stroke-width="1" marker-end="url(#ar3)"/>
+    <line x1="325" y1="76" x2="270" y2="140" stroke="var(--ink3)" stroke-width="1" marker-end="url(#ar3)"/>
+    <line x1="355" y1="76" x2="410" y2="140" stroke="var(--ink3)" stroke-width="1" marker-end="url(#ar3)"/>
+    <line x1="380" y1="76" x2="570" y2="140" stroke="var(--ink3)" stroke-width="1" marker-end="url(#ar3)"/>
+
+    <!-- 4 problems -->
+    <rect x="25" y="145" width="155" height="60" rx="10" fill="var(--teal-bg)" stroke="var(--teal-br)" stroke-width="0.5"/>
+    <text class="ts" x="102" y="170" text-anchor="middle" fill="var(--teal)">Hiểu CSKH tốt</text>
+    <text class="ts" x="102" y="188" text-anchor="middle" fill="var(--teal)">là gì</text>
+
+    <rect x="195" y="145" width="155" height="60" rx="10" fill="var(--teal-bg)" stroke="var(--teal-br)" stroke-width="0.5"/>
+    <text class="ts" x="272" y="170" text-anchor="middle" fill="var(--teal)">So sánh các</text>
+    <text class="ts" x="272" y="188" text-anchor="middle" fill="var(--teal)">mô hình CSKH</text>
+
+    <rect x="365" y="145" width="155" height="60" rx="10" fill="var(--teal-bg)" stroke="var(--teal-br)" stroke-width="0.5"/>
+    <text class="ts" x="442" y="170" text-anchor="middle" fill="var(--teal)">Thiết kế</text>
+    <text class="ts" x="442" y="188" text-anchor="middle" fill="var(--teal)">quy trình CSKH</text>
+
+    <rect x="535" y="145" width="130" height="60" rx="10" fill="var(--teal-bg)" stroke="var(--teal-br)" stroke-width="0.5"/>
+    <text class="ts" x="600" y="170" text-anchor="middle" fill="var(--teal)">Đào tạo</text>
+    <text class="ts" x="600" y="188" text-anchor="middle" fill="var(--teal)">nhân viên mới</text>
+
+    <text class="ts" x="340" y="235" text-anchor="middle">1 chủ đề → 4 bài toán khác nhau → AI làm 4 việc hoàn toàn khác</text>
+  </svg></div>
+  <div class="quote">Ví dụ khác: Chủ đề là "Đi Đà Nẵng". Nhưng bài toán có thể là <strong>chọn thời điểm đi</strong>, <strong>lập ngân sách</strong>, <strong>lên lịch trình cho gia đình có trẻ nhỏ</strong>, hay <strong>so sánh 3 khách sạn</strong>. Cùng một chủ đề, bốn công việc khác nhau.</div>
+</section>
+
+<!-- ============ SECTION 4: SIX QUESTIONS ============ -->
+<section id="s4">
+  <h2>4. Khung sáu câu hỏi trước khi giao việc cho AI</h2>
+  <p class="sub">Trả lời hết sáu câu này bằng tiếng Việt đơn giản là bạn đã "giao việc" đủ rõ.</p>
+  <div class="glass-stage"><svg viewBox="0 0 680 430" class="diagram">
+    <defs>
+      <marker id="ar4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+    <!-- 6 vertical steps -->
+    <g>
+      <rect x="120" y="20" width="440" height="52" rx="10" fill="var(--blue-bg)" stroke="var(--blue-br)" stroke-width="0.5"/>
+      <text class="th" x="145" y="43" fill="var(--blue)">1. Việc gì?</text>
+      <text class="ts" x="145" y="61" fill="var(--blue)">Chủ đề và bài toán tôi đang cần giải quyết</text>
+    </g>
+    <line x1="340" y1="72" x2="340" y2="88" stroke="var(--ink3)" stroke-width="1.2" marker-end="url(#ar4)"/>
+    <g>
+      <rect x="120" y="90" width="440" height="52" rx="10" fill="var(--coral-bg)" stroke="var(--coral-br)" stroke-width="0.5"/>
+      <text class="th" x="145" y="113" fill="var(--coral)">2. Để làm gì?</text>
+      <text class="ts" x="145" y="131" fill="var(--coral)">Mục tiêu cuối cùng: hiểu, dạy, hay ra quyết định</text>
+    </g>
+    <line x1="340" y1="142" x2="340" y2="158" stroke="var(--ink3)" stroke-width="1.2" marker-end="url(#ar4)"/>
+    <g>
+      <rect x="120" y="160" width="440" height="52" rx="10" fill="var(--teal-bg)" stroke="var(--teal-br)" stroke-width="0.5"/>
+      <text class="th" x="145" y="183" fill="var(--teal)">3. Cho ai?</text>
+      <text class="ts" x="145" y="201" fill="var(--teal)">Ai sẽ dùng kết quả này</text>
+    </g>
+    <line x1="340" y1="212" x2="340" y2="228" stroke="var(--ink3)" stroke-width="1.2" marker-end="url(#ar4)"/>
+    <g>
+      <rect x="120" y="230" width="440" height="52" rx="10" fill="var(--green-bg)" stroke="var(--green-br)" stroke-width="0.5"/>
+      <text class="th" x="145" y="253" fill="var(--green)">4. Trong hoàn cảnh nào?</text>
+      <text class="ts" x="145" y="271" fill="var(--green)">Thời gian, nguồn lực, ngân sách, ràng buộc</text>
+    </g>
+    <line x1="340" y1="282" x2="340" y2="298" stroke="var(--ink3)" stroke-width="1.2" marker-end="url(#ar4)"/>
+    <g>
+      <rect x="120" y="300" width="440" height="52" rx="10" fill="var(--amber-bg)" stroke="var(--amber-br)" stroke-width="0.5"/>
+      <text class="th" x="145" y="323" fill="var(--amber)">5. Đến đâu?</text>
+      <text class="ts" x="145" y="341" fill="var(--amber)">Phạm vi: làm gì, chưa làm gì</text>
+    </g>
+    <line x1="340" y1="352" x2="340" y2="368" stroke="var(--ink3)" stroke-width="1.2" marker-end="url(#ar4)"/>
+    <g>
+      <rect x="120" y="370" width="440" height="52" rx="10" fill="var(--purple-bg)" stroke="var(--purple-br)" stroke-width="0.5"/>
+      <text class="th" x="145" y="393" fill="var(--purple)">6. Cần nhận gì?</text>
+      <text class="ts" x="145" y="411" fill="var(--purple)">Đầu ra: bảng, checklist, kế hoạch, kịch bản…</text>
+    </g>
+  </svg></div>
+  <div class="caption">
+    <strong>Không cần nhớ tên tiếng Anh</strong> (What–Why–Who–Where–Width/Depth–Output). Chỉ cần nhớ sáu câu hỏi tiếng Việt này. Trả lời được hết là bạn đã sẵn sàng giao việc cho AI.
+  </div>
+</section>
+
+<!-- ============ SECTION 5: OUTPUT ============ -->
+<section id="s5">
+  <h2>5. Muốn AI giao lại "món đồ" gì?</h2>
+  <p class="sub">"Chi tiết", "chuyên nghiệp", "sâu sắc" không phải là đầu ra. Đầu ra phải gọi được tên.</p>
+  <div class="glass-stage"><svg viewBox="0 0 680 250" class="diagram">
+    <defs>
+      <marker id="ar5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+    <rect x="250" y="20" width="180" height="52" rx="10" fill="var(--blue-bg)" stroke="var(--blue-br)" stroke-width="0.5"/>
+    <text class="th" x="340" y="43" text-anchor="middle" fill="var(--blue)">Tôi cần hỗ trợ</text>
+    <text class="ts" x="340" y="62" text-anchor="middle" fill="var(--blue)">chăm sóc khách hàng</text>
+
+    <!-- decision -->
+    <text class="t" x="340" y="100" text-anchor="middle">Dùng để làm gì?</text>
+    <line x1="300" y1="72" x2="140" y2="130" stroke="var(--ink3)" stroke-width="1" marker-end="url(#ar5)"/>
+    <line x1="340" y1="110" x2="340" y2="130" stroke="var(--ink3)" stroke-width="1" marker-end="url(#ar5)"/>
+    <line x1="380" y1="72" x2="545" y2="130" stroke="var(--ink3)" stroke-width="1" marker-end="url(#ar5)"/>
+
+    <rect x="30" y="135" width="200" height="80" rx="10" fill="var(--teal-bg)" stroke="var(--teal-br)" stroke-width="0.5"/>
+    <text class="ts" x="130" y="160" text-anchor="middle" fill="var(--teal)">Ra quyết định</text>
+    <text class="th" x="130" y="182" text-anchor="middle" fill="var(--teal)">→ Bảng so sánh</text>
+
+    <rect x="245" y="135" width="200" height="80" rx="10" fill="var(--amber-bg)" stroke="var(--amber-br)" stroke-width="0.5"/>
+    <text class="ts" x="345" y="160" text-anchor="middle" fill="var(--amber)">Triển khai công việc</text>
+    <text class="th" x="345" y="182" text-anchor="middle" fill="var(--amber)">→ Checklist / quy trình</text>
+
+    <rect x="460" y="135" width="200" height="80" rx="10" fill="var(--purple-bg)" stroke="var(--purple-br)" stroke-width="0.5"/>
+    <text class="ts" x="560" y="160" text-anchor="middle" fill="var(--purple)">Đào tạo nhân viên</text>
+    <text class="th" x="560" y="182" text-anchor="middle" fill="var(--purple)">→ Giáo án / kịch bản</text>
+  </svg></div>
+  <div class="caption">
+    <strong>Các "món" thường gặp:</strong> bảng so sánh · checklist · kế hoạch · lịch trình · kịch bản · mẫu biểu · hướng dẫn từng bước · bộ tiêu chí đánh giá. Nói rõ bạn muốn dạng nào, AI sẽ trả đúng khuôn đó.
+  </div>
+</section>
+
+<!-- ============ SECTION 6: AUDIENCE ============ -->
+<section id="s6">
+  <h2>6. Cùng một nội dung, ba người nhận khác nhau</h2>
+  <p class="sub">Một bác sĩ không giải thích bệnh cho bệnh nhân giống như trình bày với đồng nghiệp bác sĩ.</p>
+  <div class="glass-stage"><svg viewBox="0 0 680 240" class="diagram">
+    <defs>
+      <marker id="ar6" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+    <rect x="250" y="20" width="180" height="52" rx="10" fill="var(--blue-bg)" stroke="var(--blue-br)" stroke-width="0.5"/>
+    <text class="th" x="340" y="43" text-anchor="middle" fill="var(--blue)">Chủ đề chung</text>
+    <text class="ts" x="340" y="62" text-anchor="middle" fill="var(--blue)">Dùng AI viết nội dung</text>
+
+    <line x1="300" y1="72" x2="140" y2="120" stroke="var(--ink3)" stroke-width="1" marker-end="url(#ar6)"/>
+    <line x1="340" y1="72" x2="340" y2="120" stroke="var(--ink3)" stroke-width="1" marker-end="url(#ar6)"/>
+    <line x1="380" y1="72" x2="545" y2="120" stroke="var(--ink3)" stroke-width="1" marker-end="url(#ar6)"/>
+
+    <rect x="30" y="125" width="200" height="90" rx="10" fill="var(--teal-bg)" stroke="var(--teal-br)" stroke-width="0.5"/>
+    <text class="th" x="130" y="152" text-anchor="middle" fill="var(--teal)">Chủ cửa hàng</text>
+    <text class="ts" x="130" y="175" text-anchor="middle" fill="var(--teal)">Cần hiểu để</text>
+    <text class="ts" x="130" y="192" text-anchor="middle" fill="var(--teal)">quản lý team</text>
+
+    <rect x="245" y="125" width="200" height="90" rx="10" fill="var(--amber-bg)" stroke="var(--amber-br)" stroke-width="0.5"/>
+    <text class="th" x="345" y="152" text-anchor="middle" fill="var(--amber)">Nhân viên content</text>
+    <text class="ts" x="345" y="175" text-anchor="middle" fill="var(--amber)">Cần quy trình</text>
+    <text class="ts" x="345" y="192" text-anchor="middle" fill="var(--amber)">thực hành hàng ngày</text>
+
+    <rect x="460" y="125" width="200" height="90" rx="10" fill="var(--purple-bg)" stroke="var(--purple-br)" stroke-width="0.5"/>
+    <text class="th" x="560" y="152" text-anchor="middle" fill="var(--purple)">Giám đốc marketing</text>
+    <text class="ts" x="560" y="175" text-anchor="middle" fill="var(--purple)">Cần tiêu chí để</text>
+    <text class="ts" x="560" y="192" text-anchor="middle" fill="var(--purple)">ra quyết định</text>
+  </svg></div>
+  <div class="caption">
+    <strong>Audience không chỉ là tuổi hay nghề.</strong> Cần biết: họ đã biết gì rồi? Họ cần làm gì sau khi đọc? Có bao nhiêu thời gian? Ngại điều gì? Ngôn ngữ nào họ dễ hiểu?
+  </div>
+</section>
+
+<!-- ============ SECTION 7: SCOPE ============ -->
+<section id="s7">
+  <h2>7. Chiếc hộp phạm vi — biết rõ lúc này chưa cần làm gì</h2>
+  <p class="sub">Scope tốt không phải cố nhồi thật nhiều, mà là biết rõ cái gì để lại sau.</p>
+  <div class="glass-stage"><svg viewBox="0 0 680 150" class="diagram">
+    <defs>
+      <marker id="ar7" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+    <rect x="20" y="45" width="150" height="56" rx="10" fill="var(--blue-bg)" stroke="var(--blue-br)" stroke-width="0.5"/>
+    <text class="th" x="95" y="70" text-anchor="middle" fill="var(--blue)">Mục tiêu</text>
+    <text class="ts" x="95" y="89" text-anchor="middle" fill="var(--blue)">hiện tại</text>
+
+    <line x1="170" y1="60" x2="215" y2="45" stroke="var(--teal-br)" stroke-width="1.5" marker-end="url(#ar7)"/>
+    <line x1="170" y1="86" x2="215" y2="101" stroke="var(--coral-br)" stroke-width="1.5" marker-end="url(#ar7)"/>
+
+    <rect x="225" y="18" width="200" height="52" rx="10" fill="var(--teal-bg)" stroke="var(--teal-br)" stroke-width="0.5"/>
+    <text class="th" x="325" y="41" text-anchor="middle" fill="var(--teal)">Trong phạm vi</text>
+    <text class="ts" x="325" y="60" text-anchor="middle" fill="var(--teal)">Cần làm ngay</text>
+
+    <rect x="225" y="78" width="200" height="52" rx="10" fill="var(--coral-bg)" stroke="var(--coral-br)" stroke-width="0.5"/>
+    <text class="th" x="325" y="101" text-anchor="middle" fill="var(--coral)">Ngoài phạm vi</text>
+    <text class="ts" x="325" y="120" text-anchor="middle" fill="var(--coral)">Để làm sau</text>
+  </svg></div>
+  <table>
+    <tr><th class="in-scope">✓ Trong phạm vi</th><th class="out-scope">✗ Ngoài phạm vi</th></tr>
+    <tr><td class="in-scope">Cách viết bài Facebook cơ bản</td><td class="out-scope">Chiến lược thương hiệu 5 năm</td></tr>
+    <tr><td class="in-scope">Lịch đăng bài trong 4 tuần</td><td class="out-scope">Tối ưu quảng cáo nâng cao</td></tr>
+    <tr><td class="in-scope">Checklist kiểm tra bài viết</td><td class="out-scope">Xây dựng hệ thống CRM</td></tr>
+    <tr><td class="in-scope">Hai nhân viên tự làm được</td><td class="out-scope">Tuyển đội marketing chuyên nghiệp</td></tr>
+  </table>
+</section>
+
+<!-- ============ SECTION 8: TASK TYPES ============ -->
+<section id="s8">
+  <h2>8. Sáu chiếc mũ của AI</h2>
+  <p class="sub">Mỗi lúc chỉ đội một mũ. Đừng bắt AI vừa tìm hiểu, vừa thiết kế, vừa phản biện trong một lượt.</p>
+  <div class="tabs">
+    <div class="tab active" data-tab="t1">Giải thích</div>
+    <div class="tab" data-tab="t2">So sánh</div>
+    <div class="tab" data-tab="t3">Chẩn đoán</div>
+    <div class="tab" data-tab="t4">Thiết kế</div>
+    <div class="tab" data-tab="t5">Phản biện</div>
+    <div class="tab" data-tab="t6">Giảng dạy</div>
+  </div>
+  <div class="panel active" id="t1">
+    <div class="prompt-box prompt-good"><span class="label">Khi cần: HIỂU một vấn đề</span>
+    <span class="body">"Giải thích cho tôi: chăm sóc khách hàng tốt là gì trong bối cảnh doanh nghiệp dịch vụ nhỏ? Nêu 5 tiêu chí quan trọng nhất."</span></div>
+  </div>
+  <div class="panel" id="t2">
+    <div class="prompt-box prompt-good"><span class="label">Khi cần: CHỌN giữa nhiều phương án</span>
+    <span class="body">"So sánh 3 mô hình CSKH: chủ động, phản ứng, theo vòng đời khách hàng. Trình bày dạng bảng: ưu điểm, nhược điểm, phù hợp với ai."</span></div>
+  </div>
+  <div class="panel" id="t3">
+    <div class="prompt-box prompt-good"><span class="label">Khi cần: TÌM nguyên nhân</span>
+    <span class="body">"Khách hàng của tôi hay bỏ giữa chừng khi gọi hỗ trợ. Hãy giúp tôi phân tích các nguyên nhân có thể có và cách kiểm tra từng nguyên nhân."</span></div>
+  </div>
+  <div class="panel" id="t4">
+    <div class="prompt-box prompt-good"><span class="label">Khi cần: TẠO một thứ mới</span>
+    <span class="body">"Thiết kế quy trình CSKH 5 bước cho công ty dịch vụ nhỏ (10 nhân viên, hỗ trợ qua điện thoại và Zalo). Mỗi bước nêu: mục tiêu, ai làm, đầu vào, đầu ra."</span></div>
+  </div>
+  <div class="panel" id="t5">
+    <div class="prompt-box prompt-good"><span class="label">Khi cần: TÌM điểm yếu</span>
+    <span class="body">"Đây là quy trình CSKH hiện tại của tôi [dán vào]. Hãy chỉ ra ít nhất 5 điểm yếu hoặc rủi ro, và đề xuất cách sửa cho từng cái."</span></div>
+  </div>
+  <div class="panel" id="t6">
+    <div class="prompt-box prompt-good"><span class="label">Khi cần: BIẾN kiến thức thành bài học</span>
+    <span class="body">"Biến quy trình CSKH này thành giáo án buổi training 2 giờ cho nhân viên mới: mục tiêu, các phần chính, 1-2 hoạt động thực hành, cách kiểm tra cuối buổi."</span></div>
+  </div>
+  <div class="glass-stage"><svg viewBox="0 0 680 90" class="diagram" style="margin-top:16px">
+    <defs>
+      <marker id="ar8" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+    <rect x="10" y="25" width="110" height="40" rx="8" fill="var(--blue-bg)" stroke="var(--blue-br)" stroke-width="0.5"/>
+    <text class="ts" x="65" y="49" text-anchor="middle" fill="var(--blue)">Giải thích</text>
+    <line x1="120" y1="45" x2="140" y2="45" stroke="var(--ink3)" stroke-width="1.2" marker-end="url(#ar8)"/>
+    <rect x="145" y="25" width="105" height="40" rx="8" fill="var(--teal-bg)" stroke="var(--teal-br)" stroke-width="0.5"/>
+    <text class="ts" x="197" y="49" text-anchor="middle" fill="var(--teal)">So sánh</text>
+    <line x1="250" y1="45" x2="270" y2="45" stroke="var(--ink3)" stroke-width="1.2" marker-end="url(#ar8)"/>
+    <rect x="275" y="25" width="105" height="40" rx="8" fill="var(--green-bg)" stroke="var(--green-br)" stroke-width="0.5"/>
+    <text class="ts" x="327" y="49" text-anchor="middle" fill="var(--green)">Thiết kế</text>
+    <line x1="380" y1="45" x2="400" y2="45" stroke="var(--ink3)" stroke-width="1.2" marker-end="url(#ar8)"/>
+    <rect x="405" y="25" width="105" height="40" rx="8" fill="var(--amber-bg)" stroke="var(--amber-br)" stroke-width="0.5"/>
+    <text class="ts" x="457" y="49" text-anchor="middle" fill="var(--amber)">Phản biện</text>
+    <line x1="510" y1="45" x2="530" y2="45" stroke="var(--ink3)" stroke-width="1.2" marker-end="url(#ar8)"/>
+    <rect x="535" y="25" width="135" height="40" rx="8" fill="var(--purple-bg)" stroke="var(--purple-br)" stroke-width="0.5"/>
+    <text class="ts" x="602" y="49" text-anchor="middle" fill="var(--purple)">Đóng gói / Dạy</text>
+  </svg></div>
+  <div class="caption">
+    <strong>Thứ tự tự nhiên:</strong> Giải thích → So sánh → Thiết kế → Phản biện → Đóng gói. Mỗi bước là một prompt riêng, kết quả bước trước làm đầu vào cho bước sau.
+  </div>
+</section>
+
+<!-- ============ SECTION 9: PHIEU GIAO VIEC ============ -->
+<section id="s9">
+  <h2>9. Phiếu giao việc cho AI</h2>
+  <p class="sub">Gom sáu câu hỏi thành một phiếu. Đây là "não" cho mọi lần làm việc với AI về sau.</p>
+  <div class="glass-stage"><svg viewBox="0 0 680 300" class="diagram">
+    <rect x="180" y="20" width="320" height="46" rx="10" fill="var(--blue-bg)" stroke="var(--blue-br)" stroke-width="0.5"/>
+    <text class="th" x="340" y="48" text-anchor="middle" fill="var(--blue)">Phiếu giao việc cho AI</text>
+
+    <rect x="30" y="100" width="300" height="60" rx="10" fill="var(--coral-bg)" stroke="var(--coral-br)" stroke-width="0.5"/>
+    <text class="ts" x="180" y="135" text-anchor="middle" fill="var(--coral)">Tôi đang cần giải quyết việc gì?</text>
+
+    <rect x="350" y="100" width="300" height="60" rx="10" fill="var(--teal-bg)" stroke="var(--teal-br)" stroke-width="0.5"/>
+    <text class="ts" x="500" y="135" text-anchor="middle" fill="var(--teal)">Ai sẽ sử dụng kết quả?</text>
+
+    <rect x="30" y="180" width="300" height="60" rx="10" fill="var(--green-bg)" stroke="var(--green-br)" stroke-width="0.5"/>
+    <text class="ts" x="180" y="207" text-anchor="middle" fill="var(--green)">Hoàn cảnh và giới hạn</text>
+    <text class="ts" x="180" y="225" text-anchor="middle" fill="var(--green)">(thời gian, nguồn lực) là gì?</text>
+
+    <rect x="350" y="180" width="300" height="60" rx="10" fill="var(--purple-bg)" stroke="var(--purple-br)" stroke-width="0.5"/>
+    <text class="ts" x="500" y="215" text-anchor="middle" fill="var(--purple)">Tôi muốn nhận lại thứ gì?</text>
+
+    <line x1="340" y1="66" x2="180" y2="96" stroke="var(--ink3)" stroke-width="1"/>
+    <line x1="340" y1="66" x2="500" y2="96" stroke="var(--ink3)" stroke-width="1"/>
+    <line x1="180" y1="160" x2="180" y2="176" stroke="var(--ink3)" stroke-width="1"/>
+    <line x1="500" y1="160" x2="500" y2="176" stroke="var(--ink3)" stroke-width="1"/>
+
+    <text class="ts" x="340" y="278" text-anchor="middle">Điền xong 4 ô này → copy vào ô chat → giao cho AI</text>
+  </svg></div>
+  <div class="prompt-box prompt-good" style="margin-top:8px">
+    <span class="label">Mẫu phiếu đơn giản (copy để dùng)</span>
+    <span class="body" style="font-style:normal; white-space:pre-line;">Tôi đang cần: [việc cần giải quyết]
+
+Kết quả này dùng cho: [ai sử dụng]
+
+Bối cảnh của tôi: [thời gian, nguồn lực, kinh nghiệm, khó khăn]
+
+Chỉ tập trung vào: [phạm vi cần làm]
+Chưa cần đề cập: [phạm vi không làm]
+
+Tôi muốn AI giúp: [giải thích / so sánh / thiết kế / phản biện]
+
+Kết quả cần ở dạng: [bảng / checklist / kế hoạch / kịch bản…]</span>
+  </div>
+</section>
+
+<footer>
+  Buổi 1 — Framing · Bộ sơ đồ minh hoạ · Mở file này bằng trình duyệt để xem tương tác
+</footer>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var target = tab.getAttribute('data-tab');
+      var parent = tab.closest('section');
+      parent.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+      parent.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+      tab.classList.add('active');
+      document.getElementById(target).classList.add('active');
+    });
+  });
+  document.querySelectorAll('.nav a').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      var el = document.querySelector(a.getAttribute('href'));
+      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+</script>
+</body>
+</html>

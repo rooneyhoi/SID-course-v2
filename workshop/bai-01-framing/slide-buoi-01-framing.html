@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Buổi 1 — Framing: Nói rõ điều bạn thực sự cần</title>
+<style>
+  :root{
+    --ink:#15233b;--muted:#66738a;--paper:#f6f3ec;--white:#fff;
+    --blue:#2563eb;--cyan:#0ea5a6;--coral:#ef6a5b;--gold:#f2b84b;
+    --line:#d9dfeb;--soft:#eaf1ff;--soft2:#e9f7f5;--shadow:0 18px 60px rgba(24,36,60,.14);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#111827;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+  .deck{height:100%;display:grid;place-items:center}
+  .slide{
+    display:none;position:relative;width:min(100vw,177.78vh);height:min(100vh,56.25vw);
+    min-width:320px;overflow:hidden;background:var(--paper);padding:5.4% 6.2% 5%;
+    box-shadow:var(--shadow)
+  }
+  .slide.active{display:flex;flex-direction:column}
+  .slide::after{content:"";position:absolute;right:-9%;bottom:-30%;width:34%;height:60%;border-radius:50%;background:rgba(37,99,235,.06)}
+  .slide.dark{background:var(--ink);color:var(--white)}
+  .slide.blue{background:linear-gradient(135deg,#183f92,#2563eb);color:var(--white)}
+  .slide.teal{background:linear-gradient(135deg,#0f5355,#0ea5a6);color:var(--white)}
+  .eyebrow{font-size:clamp(12px,1.05vw,20px);letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--blue);margin-bottom:1.4%}
+  .dark .eyebrow,.blue .eyebrow,.teal .eyebrow{color:#9fe8e3}
+  h1{font-size:clamp(36px,5.1vw,84px);line-height:1.02;letter-spacing:-.045em;margin:0;max-width:88%}
+  h2{font-size:clamp(28px,3.3vw,58px);line-height:1.08;letter-spacing:-.035em;margin:0 0 2.4%;max-width:95%}
+  h3{font-size:clamp(18px,1.65vw,30px);line-height:1.18;margin:0 0 .7em}
+  p,li,td,th{font-size:clamp(14px,1.34vw,24px);line-height:1.42}
+  p{margin:.3em 0 .85em}.lead{font-size:clamp(20px,2vw,36px);line-height:1.35;max-width:80%;color:var(--muted)}
+  .dark .lead,.blue .lead,.teal .lead{color:#dce7fb}
+  .hero-accent{color:#72ddd4}.accent{color:var(--blue)}.coral{color:var(--coral)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:4%;align-items:stretch;flex:1}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5%;align-items:stretch;flex:1}
+  .card{background:rgba(255,255,255,.86);border:1px solid var(--line);border-radius:18px;padding:5%;box-shadow:0 8px 28px rgba(24,36,60,.06)}
+  .card.bad{border-top:7px solid var(--coral)}.card.good{border-top:7px solid var(--cyan)}
+  .card h3{display:flex;align-items:center;gap:.5em}.num{font-size:.75em;color:var(--blue)}
+  .quote{font-size:clamp(20px,2.25vw,40px);line-height:1.35;font-weight:700;max-width:85%;padding-left:3%;border-left:8px solid var(--gold)}
+  .prompt{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:clamp(12px,1.05vw,19px);line-height:1.5;background:#fff;border:1px solid var(--line);border-radius:15px;padding:4%;color:#24324a}
+  .good .prompt{background:#f1fbf8}.bad .prompt{background:#fff7f5}
+  ul{margin:.2em 0;padding-left:1.2em}li{margin:.3em 0}li::marker{color:var(--blue)}
+  .big-word{font-size:clamp(54px,9vw,150px);font-weight:900;letter-spacing:-.07em;line-height:.9}
+  .definition{margin-top:auto;font-size:clamp(21px,2.2vw,40px);font-weight:700;max-width:90%}
+  .flow{display:flex;align-items:center;justify-content:center;gap:1.3%;flex:1}
+  .node{position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;padding:2.2% 1.6%;min-width:14%;text-align:center;font-size:clamp(12px,1.15vw,21px);font-weight:750;z-index:1}
+  .node.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.node.tealn{background:var(--cyan);color:#fff;border-color:var(--cyan)}
+  .arrow{font-size:clamp(22px,3vw,50px);color:var(--blue);font-weight:400}
+  .branch{display:grid;grid-template-columns:28% 1fr;gap:4%;align-items:center;flex:1}
+  .root{background:var(--blue);color:#fff;border-radius:24px;padding:10% 7%;text-align:center;font-size:clamp(18px,1.8vw,32px);font-weight:800}
+  .leaves{display:grid;grid-template-columns:1fr 1fr;gap:5%}.leaf{background:#fff;border-left:7px solid var(--cyan);padding:4.5%;border-radius:12px;font-size:clamp(14px,1.25vw,23px);font-weight:700}
+  .six{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5%;flex:1}
+  .step{background:#fff;border:1px solid var(--line);border-radius:16px;padding:6%;position:relative}
+  .step b{display:block;font-size:clamp(19px,1.65vw,30px);margin:.2em 0}.step span{font-size:clamp(12px,1.08vw,20px);color:var(--muted)}
+  .bubble{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:#fff;font-weight:900}
+  table{border-collapse:collapse;width:100%;background:#fff;border-radius:14px;overflow:hidden}
+  th{background:var(--ink);color:#fff;text-align:left;padding:1.8% 2%}
+  td{padding:1.55% 2%;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:0}.small td,.small th{font-size:clamp(11px,1.02vw,18px);padding:1.05% 1.4%}
+  .split-label{display:inline-block;font-size:clamp(12px,1vw,18px);font-weight:850;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2%}
+  .inside{color:var(--cyan)}.outside{color:var(--coral)}
+  .taskline{display:grid;grid-template-columns:repeat(5,1fr);gap:1.5%;align-items:center;flex:1}
+  .task{background:#fff;border-top:7px solid var(--blue);border-radius:14px;padding:10% 6%;text-align:center}
+  .task b{display:block;font-size:clamp(16px,1.35vw,25px);margin-bottom:.4em}.task span{font-size:clamp(11px,.95vw,17px);color:var(--muted)}
+  .brief{display:grid;grid-template-columns:1.1fr .9fr;gap:5%;flex:1;align-items:center}
+  .brief-center{width:85%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;text-align:center;background:var(--blue);color:#fff;font-size:clamp(20px,2vw,36px);font-weight:900;padding:12%}
+  .brief-list{display:grid;gap:3%}.brief-item{background:#fff;border-left:7px solid var(--cyan);border-radius:12px;padding:3% 4%;font-size:clamp(13px,1.15vw,21px);font-weight:700}
+  .exercise{background:var(--ink);color:#fff}.exercise .eyebrow{color:var(--gold)}
+  .timer{position:absolute;right:6.2%;top:6%;font-size:clamp(12px,1vw,18px);color:#b8c6dd}
+  .check{display:grid;grid-template-columns:repeat(2,1fr);gap:3%;margin-top:1%}.check div{background:#fff;border-radius:14px;padding:3%;font-size:clamp(13px,1.2vw,22px);font-weight:700}
+  .footer{position:absolute;left:6.2%;right:6.2%;bottom:2.3%;display:flex;justify-content:space-between;color:var(--muted);font-size:clamp(10px,.8vw,15px);z-index:2}
+  .dark .footer,.blue .footer,.teal .footer,.exercise .footer{color:#aebbd0}
+  .progress{position:fixed;left:0;bottom:0;height:5px;background:var(--cyan);transition:width .25s;z-index:20}
+  .help{position:fixed;right:16px;top:14px;color:#fff;font-size:12px;opacity:.55;z-index:30}
+  .notes{display:none;position:absolute;left:6%;right:6%;bottom:7%;z-index:10;background:#111827;color:#fff;padding:2%;border-radius:12px;font-size:clamp(12px,1vw,18px);box-shadow:var(--shadow)}
+  body.show-notes .active .notes{display:block}
+  .overview{display:none;position:fixed;inset:0;z-index:50;background:#111827;padding:2%;overflow:auto;grid-template-columns:repeat(4,1fr);gap:14px}
+  body.show-overview .overview{display:grid}
+  .thumb{background:var(--paper);color:var(--ink);aspect-ratio:16/9;padding:7%;border-radius:8px;cursor:pointer;overflow:hidden;font-weight:800;font-size:clamp(10px,1vw,16px)}
+  .thumb:hover{outline:4px solid var(--cyan)}
+  @media(max-aspect-ratio:4/3){
+    .help{display:none}.slide{padding:6%}.grid2{gap:2.5%}.card{padding:4%}
+  }
+  @media print{
+    html,body{height:auto;overflow:visible;background:#fff}.deck{display:block}.slide{display:flex!important;page-break-after:always;width:13.333in;height:7.5in;box-shadow:none}.help,.progress,.overview{display:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="help">← → chuyển slide · F toàn màn hình · N ghi chú · O tổng quan</div>
+<main class="deck">
+
+<section class="slide dark active">
+  <div class="eyebrow">SID · Buổi 1</div>
+  <h1>Trước khi hỏi AI,<br><span class="hero-accent">hãy nói rõ mình thực sự cần gì</span></h1>
+  <p class="lead">Framing as Cognitive Control — dành cho người non‑IT, no‑code</p>
+  <div class="footer"><span>Problem Framing & Goal Structuring</span><span>01</span></div>
+  <aside class="notes">Mở bằng câu hỏi: “Ai từng viết prompt rất dài nhưng kết quả vẫn không dùng được?” Không giải thích thuật ngữ Framing ngay.</aside>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Mục tiêu buổi học</div>
+  <h2>Sau buổi này, bạn sẽ giao việc cho AI rõ hơn</h2>
+  <div class="grid2">
+    <div>
+      <ul>
+        <li>Phân biệt <b>chủ đề – bài toán – đầu ra</b></li>
+        <li>Xác định người dùng, bối cảnh và phạm vi</li>
+        <li>Chọn đúng loại nhiệm vụ cho AI</li>
+      </ul>
+    </div>
+    <div>
+      <ul>
+        <li>Viết một <b>Framing Brief</b></li>
+        <li>Chẩn đoán prompt cũ của chính mình</li>
+        <li>Tạo đầu vào cho các bước SID tiếp theo</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><span>Đích đến: một “phiếu giao việc cho AI” dùng được ngay</span><span>02</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Tình huống mở đầu</div>
+  <h2>Prompt nào dễ làm đúng hơn?</h2>
+  <div class="grid2">
+    <div class="card bad">
+      <h3><span class="coral">A</span> Dài nhưng mơ hồ</h3>
+      <div class="prompt">“Hãy đóng vai chuyên gia hàng đầu về CSKH. Giải thích thật chi tiết, chuyên nghiệp, có ví dụ, quy trình, sai lầm và lộ trình đào tạo…”</div>
+    </div>
+    <div class="card good">
+      <h3><span class="inside">B</span> Rõ việc cần làm</h3>
+      <div class="prompt">“Tôi cần buổi hướng dẫn 90 phút cho 10 nhân viên mới. Tạo outline 3 phần và checklist thực hành. Không đề cập CRM.”</div>
+    </div>
+  </div>
+  <div class="footer"><span>Hãy để lớp chọn A hoặc B trước khi giải thích</span><span>03</span></div>
+  <aside class="notes">Cho học viên 20 giây chọn. Hỏi tiếp: “Cách B đã nói rõ thêm những gì?” Ghi câu trả lời lên bảng.</aside>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Hai chuỗi kết quả</div>
+  <h2>AI không đọc được điều đang nằm trong đầu bạn</h2>
+  <div class="flow" style="margin-bottom:4%">
+    <div class="node" style="border-color:var(--coral)">Yêu cầu mơ hồ</div><div class="arrow">→</div>
+    <div class="node">AI tự đoán</div><div class="arrow">→</div>
+    <div class="node">Nghe có vẻ hay</div><div class="arrow">→</div>
+    <div class="node" style="border-color:var(--coral)">Khó dùng</div>
+  </div>
+  <div class="flow">
+    <div class="node primary">Nhu cầu rõ</div><div class="arrow">→</div>
+    <div class="node">Giao việc rõ</div><div class="arrow">→</div>
+    <div class="node">AI hiểu đúng</div><div class="arrow">→</div>
+    <div class="node tealn">Dùng được</div>
+  </div>
+  <div class="footer"><span>Vấn đề thường nằm ở framing, không nằm ở độ dài prompt</span><span>04</span></div>
+</section>
+
+<section class="slide blue">
+  <div class="eyebrow">Khái niệm trung tâm</div>
+  <div class="big-word">FRAMING</div>
+  <div class="definition">Xác định đúng việc cần giải quyết <span class="hero-accent">trước khi</span> yêu cầu AI thực hiện.</div>
+  <div class="footer"><span>Chỉnh “gốc tư duy” trước khi chỉnh câu chữ</span><span>05</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Ẩn dụ đời thường</div>
+  <h2>“Làm cho tôi món gì ngon đi”</h2>
+  <div class="grid2">
+    <div class="quote">Người phục vụ biết rất nhiều món — nhưng chưa biết món nào phù hợp với bạn.</div>
+    <div class="card">
+      <h3>Họ vẫn phải hỏi:</h3>
+      <ul>
+        <li>Ăn sáng hay ăn tối?</li>
+        <li>Một người hay cả gia đình?</li>
+        <li>Có dị ứng không?</li>
+        <li>Ngân sách bao nhiêu?</li>
+        <li>Ăn tại chỗ hay mang về?</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><span>AI biết nhiều ≠ AI tự biết đúng nhu cầu của bạn</span><span>06</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Framing trong SID</div>
+  <h2>Sai ở bước đầu, mọi bước sau đều lệch</h2>
+  <div class="flow">
+    <div class="node primary">Frame<br>Định bài toán</div><div class="arrow">→</div>
+    <div class="node">Architect<br>Dựng cấu trúc</div><div class="arrow">→</div>
+    <div class="node">Explore<br>Khám phá</div><div class="arrow">→</div>
+    <div class="node">Reason<br>Suy luận</div><div class="arrow">→</div>
+    <div class="node">Validate<br>Kiểm tra</div>
+  </div>
+  <p class="lead" style="margin-top:3%">Synthesize & Transfer sẽ đóng gói và đưa kết quả vào sử dụng.</p>
+  <div class="footer"><span>Frame là điểm xuất phát của toàn bộ chuỗi SID</span><span>07</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Khung 5W‑O phiên bản đời thường</div>
+  <h2>Chỉ cần nhớ 6 câu hỏi trước khi giao việc</h2>
+  <div class="six">
+    <div class="step"><div class="bubble">1</div><b>Việc gì?</b><span>Chủ đề và bài toán</span></div>
+    <div class="step"><div class="bubble">2</div><b>Để làm gì?</b><span>Mục tiêu thực sự</span></div>
+    <div class="step"><div class="bubble">3</div><b>Cho ai?</b><span>Người sử dụng</span></div>
+    <div class="step"><div class="bubble">4</div><b>Hoàn cảnh nào?</b><span>Bối cảnh và ràng buộc</span></div>
+    <div class="step"><div class="bubble">5</div><b>Đến đâu?</b><span>Rộng, sâu, giới hạn</span></div>
+    <div class="step"><div class="bubble">6</div><b>Cần nhận gì?</b><span>Đầu ra cụ thể</span></div>
+  </div>
+  <div class="footer"><span>What · Why · Who · Where · Width/Depth · Output</span><span>08</span></div>
+</section>
+
+<section class="slide teal">
+  <div class="eyebrow">Kỹ thuật 1</div>
+  <h1>Topic là nơi bạn đứng.<br><span class="hero-accent">Problem là việc bạn cần làm.</span></h1>
+  <div class="footer"><span>Chủ đề đúng chưa có nghĩa là bài toán đã rõ</span><span>09</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Một chủ đề, nhiều bài toán</div>
+  <h2>“Đi Đà Nẵng” chưa phải là một yêu cầu hoàn chỉnh</h2>
+  <div class="branch">
+    <div class="root">Chủ đề<br>Đi Đà Nẵng</div>
+    <div class="leaves">
+      <div class="leaf">Chọn thời điểm đi</div>
+      <div class="leaf">Lập ngân sách</div>
+      <div class="leaf">Lịch trình có trẻ nhỏ</div>
+      <div class="leaf">So sánh khách sạn</div>
+    </div>
+  </div>
+  <div class="footer"><span>Mỗi problem cần dữ liệu, cách suy nghĩ và output khác nhau</span><span>10</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Câu hỏi chẩn đoán</div>
+  <h2>Tôi muốn AI làm gì với chủ đề này?</h2>
+  <div class="grid3">
+    <div class="card"><h3>Hiểu</h3><p>Giải thích một khái niệm hoặc cách hoạt động.</p></div>
+    <div class="card"><h3>Chọn</h3><p>So sánh các phương án để ra quyết định.</p></div>
+    <div class="card"><h3>Tìm lỗi</h3><p>Chẩn đoán nguyên nhân của vấn đề.</p></div>
+    <div class="card"><h3>Tạo mới</h3><p>Thiết kế quy trình, kế hoạch hoặc khóa học.</p></div>
+    <div class="card"><h3>Kiểm tra</h3><p>Phản biện một thứ đang có.</p></div>
+    <div class="card"><h3>Dạy lại</h3><p>Đóng gói kiến thức cho người khác.</p></div>
+  </div>
+  <div class="footer"><span>Biến “tôi muốn biết” thành một hành động nhận thức rõ ràng</span><span>11</span></div>
+</section>
+
+<section class="slide teal">
+  <div class="eyebrow">Kỹ thuật 2</div>
+  <h1>“Chi tiết” không phải đầu ra.<br><span class="hero-accent">Hãy gọi tên món đồ bạn cần.</span></h1>
+  <div class="footer"><span>Goal & Output Framing</span><span>12</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Goal → Output</div>
+  <h2>Mục đích khác nhau cần sản phẩm khác nhau</h2>
+  <table>
+    <thead><tr><th>Tôi cần…</th><th>Đầu ra phù hợp</th><th>Dùng để…</th></tr></thead>
+    <tbody>
+      <tr><td>Chọn phương án</td><td><b>Bảng so sánh</b></td><td>Nhìn trade‑off và ra quyết định</td></tr>
+      <tr><td>Triển khai công việc</td><td><b>Checklist / workflow</b></td><td>Thực hiện và kiểm tra từng bước</td></tr>
+      <tr><td>Đào tạo nhân viên</td><td><b>Outline / kịch bản</b></td><td>Tổ chức một buổi học</td></tr>
+      <tr><td>Đánh giá chất lượng</td><td><b>Rubric</b></td><td>Chấm theo tiêu chí nhất quán</td></tr>
+    </tbody>
+  </table>
+  <div class="footer"><span>Output phải là thứ có thể gọi tên, gửi đi hoặc sử dụng</span><span>13</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Câu hỏi tự kiểm</div>
+  <h1 style="max-width:96%">Nếu AI làm xong,<br>tôi muốn <span class="accent">cầm trên tay thứ gì?</span></h1>
+  <p class="lead">Một bảng? Checklist? Kế hoạch? Kịch bản? Quy trình? Bộ tiêu chí?</p>
+  <div class="footer"><span>Nếu chưa gọi tên được, Goal/Output Framing chưa xong</span><span>14</span></div>
+</section>
+
+<section class="slide teal">
+  <div class="eyebrow">Kỹ thuật 3</div>
+  <h1>Cùng một nội dung,<br><span class="hero-accent">mỗi người cần một cách khác.</span></h1>
+  <div class="footer"><span>Audience Framing</span><span>15</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Audience thay đổi framing</div>
+  <h2>“Dùng AI viết nội dung” không thể dạy giống nhau</h2>
+  <div class="grid3">
+    <div class="card"><h3>Chủ cửa hàng</h3><p>Ít công nghệ.<br>Cần hiểu để quản lý và giao việc.</p></div>
+    <div class="card"><h3>Nhân viên content</h3><p>Đã dùng AI.<br>Cần quy trình thực hành và tiêu chuẩn chất lượng.</p></div>
+    <div class="card"><h3>Giám đốc marketing</h3><p>Cần trade‑off, rủi ro và tiêu chí ra quyết định.</p></div>
+  </div>
+  <div class="footer"><span>Hỏi: họ biết gì, cần làm gì, bị giới hạn bởi điều gì?</span><span>16</span></div>
+</section>
+
+<section class="slide teal">
+  <div class="eyebrow">Kỹ thuật 4</div>
+  <h1>Scope tốt là biết rõ<br><span class="hero-accent">lúc này chưa cần làm gì.</span></h1>
+  <div class="footer"><span>Scope Design</span><span>17</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Trong và ngoài phạm vi</div>
+  <h2>Đừng học marketing “từ A đến Z” trong một lượt</h2>
+  <div class="grid2">
+    <div class="card good">
+      <span class="split-label inside">Trong phạm vi</span>
+      <ul><li>Funnel cơ bản</li><li>Chọn Facebook hoặc TikTok</li><li>Kế hoạch hành động 3 tháng</li><li>Đo lường đơn giản</li></ul>
+    </div>
+    <div class="card bad">
+      <span class="split-label outside">Ngoài phạm vi</span>
+      <ul><li>Thương hiệu dài hạn</li><li>Tối ưu quảng cáo nâng cao</li><li>Nghiên cứu thị trường chuyên sâu</li><li>Hệ thống dữ liệu phức tạp</li></ul>
+    </div>
+  </div>
+  <div class="footer"><span>Scope là một quyết định ưu tiên, không phải một danh sách tham vọng</span><span>18</span></div>
+</section>
+
+<section class="slide teal">
+  <div class="eyebrow">Kỹ thuật 5</div>
+  <h1>Mỗi lượt nên có<br><span class="hero-accent">một nhiệm vụ chính.</span></h1>
+  <div class="footer"><span>Task Definition</span><span>19</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Tách phase thay vì nhồi task</div>
+  <h2>Năm chiếc mũ AI có thể đội lần lượt</h2>
+  <div class="taskline">
+    <div class="task"><b>Explain</b><span>Hiểu vấn đề</span></div>
+    <div class="task"><b>Compare</b><span>Chọn hướng</span></div>
+    <div class="task"><b>Design</b><span>Tạo giải pháp</span></div>
+    <div class="task"><b>Critique</b><span>Tìm điểm yếu</span></div>
+    <div class="task"><b>Teach</b><span>Đóng gói để dạy</span></div>
+  </div>
+  <p class="lead">Diagnose được dùng khi mục tiêu là tìm lỗi hoặc nguyên nhân gốc.</p>
+  <div class="footer"><span>Một chuỗi prompt tốt hơn một prompt ôm tất cả</span><span>20</span></div>
+</section>
+
+<section class="slide blue">
+  <div class="eyebrow">Sản phẩm cuối buổi</div>
+  <h1>Framing Brief<br><span class="hero-accent">Phiếu giao việc cho AI</span></h1>
+  <p class="lead">150–250 từ để bạn, AI và đồng đội cùng hiểu đúng một bài toán.</p>
+  <div class="footer"><span>Không chỉ là prompt — đây là bản mô tả bài toán</span><span>21</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Cấu tạo Framing Brief</div>
+  <h2>Một trang ngắn, gom đủ phần quan trọng</h2>
+  <div class="brief">
+    <div class="brief-center">Phiếu<br>giao việc<br>cho AI</div>
+    <div class="brief-list">
+      <div class="brief-item">1. Chủ đề, bài toán và mục tiêu</div>
+      <div class="brief-item">2. Audience và bối cảnh</div>
+      <div class="brief-item">3. Trong / ngoài phạm vi</div>
+      <div class="brief-item">4. Task và đầu ra</div>
+      <div class="brief-item">5. Rủi ro nếu framing sai</div>
+    </div>
+  </div>
+  <div class="footer"><span>Đủ rõ để người khác có thể bắt đầu làm</span><span>22</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Template siêu ngắn</div>
+  <h2>Điền 6 dòng trước khi viết prompt</h2>
+  <div class="prompt" style="font-size:clamp(14px,1.22vw,22px)">
+    Tôi đang cần: <b>[VIỆC CẦN GIẢI QUYẾT]</b>.<br><br>
+    Kết quả này dùng cho: <b>[NGƯỜI SỬ DỤNG]</b>.<br>
+    Bối cảnh của tôi: <b>[THỜI GIAN, NGUỒN LỰC, KHÓ KHĂN]</b>.<br><br>
+    Chỉ tập trung vào: <b>[TRONG PHẠM VI]</b>.<br>
+    Chưa cần đề cập: <b>[NGOÀI PHẠM VI]</b>.<br><br>
+    Tôi muốn AI <b>[TASK]</b>, kết quả ở dạng <b>[OUTPUT]</b>.
+  </div>
+  <div class="footer"><span>Có thể nâng cấp thành Framing Brief đầy đủ sau khi đã quen</span><span>23</span></div>
+</section>
+
+<section class="slide exercise">
+  <div class="eyebrow">Thực hành tại lớp</div><div class="timer">7 phút</div>
+  <h2>“Phẫu thuật” một prompt thật của bạn</h2>
+  <div class="grid2">
+    <div>
+      <h3>1. Chọn một prompt cũ</h3>
+      <p>Kết quả từng nghe hay nhưng khó dùng.</p>
+      <h3>2. Chẩn đoán</h3>
+      <p>Thiếu Problem, Audience, Context, Scope, Output hay Task?</p>
+    </div>
+    <div>
+      <h3>3. Viết lại thành 6 dòng</h3>
+      <p>Dùng template Framing Brief siêu ngắn.</p>
+      <h3>4. Trao đổi theo cặp</h3>
+      <p>Người kia có hiểu bạn thực sự cần gì không?</p>
+    </div>
+  </div>
+  <div class="footer"><span>Không cố viết “hay” — chỉ cần làm rõ bài toán</span><span>24</span></div>
+  <aside class="notes">Đặt đồng hồ 7 phút. Sau 5 phút nhắc học viên đổi prompt cho người bên cạnh đọc. Mời 1–2 người chia sẻ bản trước/sau.</aside>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Hiểu sâu hơn</div>
+  <h2>Framing đưa cấu trúc trong đầu ra bên ngoài</h2>
+  <div class="flow">
+    <div class="node">Suy nghĩ<br>mơ hồ</div><div class="arrow">→</div>
+    <div class="node primary">Ngôn ngữ<br>có cấu trúc</div><div class="arrow">→</div>
+    <div class="node">AI hỗ trợ<br>xử lý</div><div class="arrow">→</div>
+    <div class="node tealn">Con người<br>kiểm tra</div>
+  </div>
+  <div class="grid3" style="flex:0;margin-top:3%">
+    <div><h3>Extended Mind</h3><p>AI mở rộng trí nhớ và tư duy.</p></div>
+    <div><h3>NLP Mindset</h3><p>Ngôn ngữ mô tả cấu trúc vấn đề.</p></div>
+    <div><h3>AI Mindset</h3><p>AI cần định hướng và phản biện.</p></div>
+  </div>
+  <div class="footer"><span>Prompt tốt là biểu hiện của tư duy có cấu trúc</span><span>25</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Năm loại tư duy</div>
+  <h2>Framing là nền cho cách làm việc trưởng thành với AI</h2>
+  <table class="small">
+    <thead><tr><th>Tư duy</th><th>Câu hỏi đời thường</th></tr></thead>
+    <tbody>
+      <tr><td><b>Strategic</b></td><td>Kết quả lớn cần đạt là gì? Điều gì ưu tiên?</td></tr>
+      <tr><td><b>Systems</b></td><td>Lỗi nằm ở input, dữ liệu, công cụ, quy trình hay đánh giá?</td></tr>
+      <tr><td><b>Structural</b></td><td>Đã rõ mục tiêu, audience, scope và output chưa?</td></tr>
+      <tr><td><b>Task Decomposition</b></td><td>Có thể chia việc này thành các bước độc lập nào?</td></tr>
+      <tr><td><b>Critical</b></td><td>Giả định, nguồn và kết luận đã được kiểm tra chưa?</td></tr>
+    </tbody>
+  </table>
+  <div class="footer"><span>Nói trôi chảy không đồng nghĩa với đúng</span><span>26</span></div>
+</section>
+
+<section class="slide dark">
+  <div class="eyebrow">Tự kiểm cuối buổi</div>
+  <h2>Bạn đã có thể trả lời “Có”?</h2>
+  <div class="check">
+    <div>✓ Phân biệt Topic và Problem</div>
+    <div>✓ Gọi tên output cần nhận</div>
+    <div>✓ Mô tả audience và context</div>
+    <div>✓ Chọn trong / ngoài scope</div>
+    <div>✓ Giao một task chính mỗi lượt</div>
+    <div>✓ Viết Framing Brief cho việc thật</div>
+  </div>
+  <div class="footer"><span>Nếu chưa: lấy một prompt cũ và sửa lại bằng 6 câu hỏi</span><span>27</span></div>
+</section>
+
+<section class="slide blue">
+  <div class="eyebrow">Thông điệp mang về</div>
+  <h1>Đừng bắt đầu bằng<br>“viết prompt thế nào?”</h1>
+  <div class="definition">Hãy bắt đầu bằng: <span class="hero-accent">“Tôi thực sự đang cần giải quyết việc gì?”</span></div>
+  <div class="footer"><span>Frame đúng trước. Prompt tốt sẽ đến sau.</span><span>28</span></div>
+</section>
+
+</main>
+<div class="progress"></div>
+<div class="overview" aria-label="Tổng quan slide"></div>
+<script>
+(() => {
+  const slides = [...document.querySelectorAll(".slide")];
+  const bar = document.querySelector(".progress");
+  const overview = document.querySelector(".overview");
+  let current = 0;
+
+  slides.forEach((slide, index) => {
+    const thumb = document.createElement("button");
+    thumb.className = "thumb";
+    thumb.type = "button";
+    const title = slide.querySelector("h1,h2");
+    thumb.textContent = `${index + 1}. ${title ? title.textContent.trim() : "Slide"}`;
+    thumb.addEventListener("click", () => {
+      document.body.classList.remove("show-overview");
+      show(index);
+    });
+    overview.appendChild(thumb);
+  });
+
+  function show(index) {
+    current = Math.max(0, Math.min(slides.length - 1, index));
+    slides.forEach((s, i) => s.classList.toggle("active", i === current));
+    bar.style.width = `${((current + 1) / slides.length) * 100}%`;
+    history.replaceState(null, "", `#${current + 1}`);
+  }
+
+  function fullscreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "ArrowRight" || event.key === " " || event.key === "PageDown") show(current + 1);
+    if (event.key === "ArrowLeft" || event.key === "PageUp") show(current - 1);
+    if (event.key === "Home") show(0);
+    if (event.key === "End") show(slides.length - 1);
+    if (event.key.toLowerCase() === "f") fullscreen();
+    if (event.key.toLowerCase() === "n") document.body.classList.toggle("show-notes");
+    if (event.key.toLowerCase() === "o") document.body.classList.toggle("show-overview");
+    if (event.key === "Escape") document.body.classList.remove("show-overview", "show-notes");
+  });
+
+  let startX = 0;
+  document.addEventListener("touchstart", e => startX = e.changedTouches[0].screenX, {passive:true});
+  document.addEventListener("touchend", e => {
+    const delta = e.changedTouches[0].screenX - startX;
+    if (Math.abs(delta) > 45) show(current + (delta < 0 ? 1 : -1));
+  }, {passive:true});
+
+  const hashIndex = Number(location.hash.slice(1)) - 1;
+  show(Number.isFinite(hashIndex) && hashIndex >= 0 ? hashIndex : 0);
+})();
+</script>
+</body>
+</html>
