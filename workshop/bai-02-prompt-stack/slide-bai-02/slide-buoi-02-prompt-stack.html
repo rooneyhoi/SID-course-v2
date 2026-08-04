@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Buổi 2 — Prompt như Giao diện nhận thức & Prompt Stack</title>
+<style>
+  :root{
+    --ink:#15233b;--muted:#66738a;--paper:#f6f3ec;--white:#fff;
+    --blue:#2563eb;--cyan:#0ea5a6;--coral:#ef6a5b;--gold:#f2b84b;
+    --line:#d9dfeb;--soft:#eaf1ff;--soft2:#e9f7f5;--shadow:0 18px 60px rgba(24,36,60,.14);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#111827;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+  .deck{height:100%;display:grid;place-items:center}
+  .slide{
+    display:none;position:relative;width:min(100vw,177.78vh);height:min(100vh,56.25vw);
+    min-width:320px;overflow:hidden;background:var(--paper);padding:5.4% 6.2% 5%;
+    box-shadow:var(--shadow)
+  }
+  .slide.active{display:flex;flex-direction:column}
+  .slide::after{content:"";position:absolute;right:-9%;bottom:-30%;width:34%;height:60%;border-radius:50%;background:rgba(37,99,235,.06)}
+  .slide.dark{background:var(--ink);color:var(--white)}
+  .slide.blue{background:linear-gradient(135deg,#183f92,#2563eb);color:var(--white)}
+  .slide.teal{background:linear-gradient(135deg,#0f5355,#0ea5a6);color:var(--white)}
+  .eyebrow{font-size:clamp(12px,1.05vw,20px);letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--blue);margin-bottom:1.4%}
+  .dark .eyebrow,.blue .eyebrow,.teal .eyebrow{color:#9fe8e3}
+  h1{font-size:clamp(36px,5.1vw,84px);line-height:1.02;letter-spacing:-.045em;margin:0;max-width:88%}
+  h2{font-size:clamp(28px,3.3vw,58px);line-height:1.08;letter-spacing:-.035em;margin:0 0 2.4%;max-width:95%}
+  h3{font-size:clamp(18px,1.65vw,30px);line-height:1.18;margin:0 0 .7em}
+  p,li,td,th{font-size:clamp(14px,1.34vw,24px);line-height:1.42}
+  p{margin:.3em 0 .85em}.lead{font-size:clamp(20px,2vw,36px);line-height:1.35;max-width:80%;color:var(--muted)}
+  .dark .lead,.blue .lead,.teal .lead{color:#dce7fb}
+  .hero-accent{color:#72ddd4}.accent{color:var(--blue)}.coral{color:var(--coral)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:4%;align-items:stretch;flex:1}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5%;align-items:stretch;flex:1}
+  .card{background:rgba(255,255,255,.86);border:1px solid var(--line);border-radius:18px;padding:5%;box-shadow:0 8px 28px rgba(24,36,60,.06)}
+  .card.bad{border-top:7px solid var(--coral)}.card.good{border-top:7px solid var(--cyan)}
+  .card h3{display:flex;align-items:center;gap:.5em}.num{font-size:.75em;color:var(--blue)}
+  .quote{font-size:clamp(20px,2.25vw,40px);line-height:1.35;font-weight:700;max-width:85%;padding-left:3%;border-left:8px solid var(--gold)}
+  .prompt{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:clamp(12px,1.05vw,19px);line-height:1.5;background:#fff;border:1px solid var(--line);border-radius:15px;padding:4%;color:#24324a}
+  .good .prompt{background:#f1fbf8}.bad .prompt{background:#fff7f5}
+  ul{margin:.2em 0;padding-left:1.2em}li{margin:.3em 0}li::marker{color:var(--blue)}
+  .big-word{font-size:clamp(54px,9vw,150px);font-weight:900;letter-spacing:-.07em;line-height:.9}
+  .definition{margin-top:auto;font-size:clamp(21px,2.2vw,40px);font-weight:700;max-width:90%}
+  .flow{display:flex;align-items:center;justify-content:center;gap:1.3%;flex:1}
+  .node{position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;padding:2.2% 1.6%;min-width:14%;text-align:center;font-size:clamp(12px,1.15vw,21px);font-weight:750;z-index:1}
+  .node.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.node.tealn{background:var(--cyan);color:#fff;border-color:var(--cyan)}
+  .arrow{font-size:clamp(22px,3vw,50px);color:var(--blue);font-weight:400}
+  .branch{display:grid;grid-template-columns:28% 1fr;gap:4%;align-items:center;flex:1}
+  .root{background:var(--blue);color:#fff;border-radius:24px;padding:10% 7%;text-align:center;font-size:clamp(18px,1.8vw,32px);font-weight:800}
+  .leaves{display:grid;grid-template-columns:1fr 1fr;gap:5%}.leaf{background:#fff;border-left:7px solid var(--cyan);padding:4.5%;border-radius:12px;font-size:clamp(14px,1.25vw,23px);font-weight:700}
+  .six{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5%;flex:1}
+  .step{background:#fff;border:1px solid var(--line);border-radius:16px;padding:6%;position:relative}
+  .step b{display:block;font-size:clamp(19px,1.65vw,30px);margin:.2em 0}.step span{font-size:clamp(12px,1.08vw,20px);color:var(--muted)}
+  .bubble{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:#fff;font-weight:900}
+  table{border-collapse:collapse;width:100%;background:#fff;border-radius:14px;overflow:hidden}
+  th{background:var(--ink);color:#fff;text-align:left;padding:1.8% 2%}
+  td{padding:1.55% 2%;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:0}.small td,.small th{font-size:clamp(11px,1.02vw,18px);padding:1.05% 1.4%}
+  .split-label{display:inline-block;font-size:clamp(12px,1vw,18px);font-weight:850;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2%}
+  .inside{color:var(--cyan)}.outside{color:var(--coral)}
+  .taskline{display:grid;grid-template-columns:repeat(5,1fr);gap:1.5%;align-items:center;flex:1}
+  .task{background:#fff;border-top:7px solid var(--blue);border-radius:14px;padding:10% 6%;text-align:center}
+  .task b{display:block;font-size:clamp(16px,1.35vw,25px);margin-bottom:.4em}.task span{font-size:clamp(11px,.95vw,17px);color:var(--muted)}
+  .brief{display:grid;grid-template-columns:1.1fr .9fr;gap:5%;flex:1;align-items:center}
+  .brief-center{width:85%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;text-align:center;background:var(--blue);color:#fff;font-size:clamp(20px,2vw,36px);font-weight:900;padding:12%}
+  .brief-list{display:grid;gap:3%}.brief-item{background:#fff;border-left:7px solid var(--cyan);border-radius:12px;padding:3% 4%;font-size:clamp(13px,1.15vw,21px);font-weight:700}
+  .exercise{background:var(--ink);color:#fff}.exercise .eyebrow{color:var(--gold)}
+  .timer{position:absolute;right:6.2%;top:6%;font-size:clamp(12px,1vw,18px);color:#b8c6dd}
+  .check{display:grid;grid-template-columns:repeat(2,1fr);gap:3%;margin-top:1%}.check div{background:#fff;color:var(--ink);border-radius:14px;padding:3%;font-size:clamp(13px,1.2vw,22px);font-weight:700}
+  .footer{position:absolute;left:6.2%;right:6.2%;bottom:2.3%;display:flex;justify-content:space-between;color:var(--muted);font-size:clamp(10px,.8vw,15px);z-index:2}
+  .dark .footer,.blue .footer,.teal .footer,.exercise .footer{color:#aebbd0}
+  .progress{position:fixed;left:0;bottom:0;height:5px;background:var(--cyan);transition:width .25s;z-index:20}
+  .help{position:fixed;right:16px;top:14px;color:#fff;font-size:12px;opacity:.55;z-index:30}
+  .notes{display:none;position:absolute;left:6%;right:6%;bottom:7%;z-index:10;background:#111827;color:#fff;padding:2%;border-radius:12px;font-size:clamp(12px,1vw,18px);box-shadow:var(--shadow)}
+  body.show-notes .active .notes{display:block}
+  .overview{display:none;position:fixed;inset:0;z-index:50;background:#111827;padding:2%;overflow:auto;grid-template-columns:repeat(4,1fr);gap:14px}
+  body.show-overview .overview{display:grid}
+  .thumb{background:var(--paper);color:var(--ink);aspect-ratio:16/9;padding:7%;border-radius:8px;cursor:pointer;overflow:hidden;font-weight:800;font-size:clamp(10px,1vw,16px)}
+  .thumb:hover{outline:4px solid var(--cyan)}
+  @media(max-aspect-ratio:4/3){
+    .help{display:none}.slide{padding:6%}.grid2{gap:2.5%}.card{padding:4%}
+  }
+  @media print{
+    html,body{height:auto;overflow:visible;background:#fff}.deck{display:block}.slide{display:flex!important;page-break-after:always;width:13.333in;height:7.5in;box-shadow:none}.help,.progress,.overview{display:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="help">← → chuyển slide · F toàn màn hình · N ghi chú · O tổng quan</div>
+<main class="deck">
+
+<section class="slide dark active">
+  <div class="eyebrow">SID · Buổi 2</div>
+  <h1>Prompt như<br><span class="hero-accent">Giao diện nhận thức</span></h1>
+  <p class="lead">Từ một câu lệnh đơn lẻ đến Prompt Stack có cấu trúc</p>
+  <div class="footer"><span>Prompt Engineering · RTC‑COE · Task Decomposition · Prompt Stack</span><span>01</span></div>
+  <aside class="notes">Mở bằng câu hỏi: “Nếu prompt đã rất đầy đủ mà kết quả vẫn nông, vấn đề có còn nằm ở cách viết prompt không?”</aside>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Điểm xuất phát</div>
+  <h2>Buổi 2 bắt đầu từ Framing Brief của Buổi 2</h2>
+  <div class="grid2">
+    <div class="card good"><h3>Bạn cần mang theo</h3><ul><li>Một bài toán thật đã framing</li><li>Audience, scope và output tương đối rõ</li><li>2–3 prompt cũ chưa cho kết quả tốt</li></ul></div>
+    <div class="card bad"><h3>Prompt không thể cứu</h3><p class="quote" style="font-size:clamp(17px,1.7vw,30px)">Một bài toán được định khung sai.</p><p>Nếu framing còn mơ hồ, hãy quay lại Buổi 2 trước.</p></div>
+  </div>
+  <div class="footer"><span>Framing Brief là input đầu tiên của Prompt Stack</span><span>02</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Mục tiêu buổi học</div>
+  <h2>Từ viết prompt đến thiết kế một quy trình với AI</h2>
+  <div class="flow">
+    <div class="node primary">Prompt</div><div class="arrow">→</div>
+    <div class="node">Prompt<br>Engineering</div><div class="arrow">→</div>
+    <div class="node">RTC‑COE</div><div class="arrow">→</div>
+    <div class="node">Task<br>Decomposition</div><div class="arrow">→</div>
+    <div class="node tealn">Prompt<br>Stack</div>
+  </div>
+  <p class="lead">Đích đến: Prompt Stack V1 gồm 3–6 step, có input, output và checkpoint.</p>
+  <div class="footer"><span>Mỗi lớp giải quyết một vấn đề khác nhau</span><span>03</span></div>
+</section>
+
+<section class="slide blue">
+  <div class="eyebrow">Khái niệm trung tâm</div>
+  <h1>Prompt không chỉ là<br><span class="hero-accent">một câu hỏi.</span></h1>
+  <div class="definition">Prompt là hướng dẫn, thông tin và dữ liệu để AI thực hiện một nhiệm vụ.</div>
+  <div class="footer"><span>Ngôn ngữ trở thành giao diện điều khiển AI</span><span>04</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Giao diện nhận thức</div>
+  <h2>Phần mềm có nút bấm; AI tạo sinh có ngôn ngữ</h2>
+  <div class="grid2">
+    <div class="card"><h3>Phần mềm thông thường</h3><p>Nút bấm · menu · biểu mẫu</p><p class="lead" style="font-size:clamp(16px,1.45vw,27px)">Giao diện giới hạn sẵn những gì người dùng có thể làm.</p></div>
+    <div class="card good"><h3>AI tạo sinh</h3><p>Nhiệm vụ · context · giới hạn · output · tiêu chí</p><p class="lead" style="font-size:clamp(16px,1.45vw,27px)">Ngôn ngữ cho AI biết phải chú ý, làm và kiểm tra điều gì.</p></div>
+  </div>
+  <div class="footer"><span>Prompt phản ánh cách người dùng hiểu và tổ chức bài toán</span><span>05</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Prompt cảm tính</div>
+  <h2>“Mọi thứ tôi cần biết” buộc AI tự đoán quá nhiều</h2>
+  <div class="prompt" style="margin-bottom:3%">“Hãy phân tích thật chi tiết về chăm sóc khách hàng và đưa ra mọi thứ tôi cần biết.”</div>
+  <div class="grid3">
+    <div><h3>Để làm gì?</h3><p>Hiểu, đào tạo hay thiết kế quy trình?</p></div>
+    <div><h3>Cho ai?</h3><p>Nhân viên mới hay quản lý?</p></div>
+    <div><h3>Ra thứ gì?</h3><p>Checklist, tài liệu hay workflow?</p></div>
+  </div>
+  <div class="footer"><span>Dài và hợp lý chưa chắc đã dùng được</span><span>06</span></div>
+</section>
+
+<section class="slide teal">
+  <div class="eyebrow">Prompt Engineering</div>
+  <h1>Không có “câu thần chú”.<br><span class="hero-accent">Chỉ có vòng lặp cải tiến.</span></h1>
+  <div class="footer"><span>Thiết kế · kiểm tra · phát hiện lỗi · điều chỉnh · thử lại</span><span>07</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Vòng lặp Prompt Engineering</div>
+  <h2>Output đầu tiên là dữ liệu để cải thiện prompt</h2>
+  <div class="flow">
+    <div class="node primary">Xác định<br>nhiệm vụ</div><div class="arrow">→</div>
+    <div class="node">Viết<br>prompt</div><div class="arrow">→</div>
+    <div class="node">Xem<br>kết quả</div><div class="arrow">→</div>
+    <div class="node">Phát hiện<br>điểm sai</div><div class="arrow">→</div>
+    <div class="node tealn">Điều chỉnh<br>& thử lại</div>
+  </div>
+  <div class="footer"><span>Đánh giá prompt bằng khả năng tạo output có thể sử dụng</span><span>08</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">6 nguyên tắc nền tảng</div>
+  <h2>Một prompt tốt giúp AI bớt phải đoán</h2>
+  <div class="six">
+    <div class="step"><div class="bubble">1</div><b>Task rõ</b><span>Một nhiệm vụ chính</span></div>
+    <div class="step"><div class="bubble">2</div><b>Context đủ</b><span>Chỉ phần làm đổi kết quả</span></div>
+    <div class="step"><div class="bubble">3</div><b>Constraint thật</b><span>Có thể quan sát, kiểm tra</span></div>
+    <div class="step"><div class="bubble">4</div><b>Output rõ</b><span>Artifact có thể sử dụng</span></div>
+    <div class="step"><div class="bubble">5</div><b>Có mẫu khi cần</b><span>Reference hoặc example</span></div>
+    <div class="step"><div class="bubble">6</div><b>Test & sửa</b><span>Không dừng ở lần đầu</span></div>
+  </div>
+  <div class="footer"><span>“Cực kỳ chi tiết” không phải constraint có thể kiểm tra</span><span>09</span></div>
+</section>
+
+<section class="slide blue">
+  <div class="eyebrow">Khung thiết kế một prompt</div>
+  <div class="big-word">RTC‑COE</div>
+  <div class="definition">Một checklist tư duy — <span class="hero-accent">không phải mẫu điền bắt buộc.</span></div>
+  <div class="footer"><span>Role · Task · Context · Constraints · Output · Evaluation</span><span>10</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">RTC‑COE</div>
+  <h2>Sáu câu hỏi để audit một prompt</h2>
+  <div class="six">
+    <div class="step"><div class="bubble">R</div><b>Role</b><span>Góc nhìn nào hữu ích?</span></div>
+    <div class="step"><div class="bubble">T</div><b>Task</b><span>AI phải làm gì?</span></div>
+    <div class="step"><div class="bubble">C</div><b>Context</b><span>Điều gì ảnh hưởng kết quả?</span></div>
+    <div class="step"><div class="bubble">C</div><b>Constraints</b><span>Giới hạn nào phải giữ?</span></div>
+    <div class="step"><div class="bubble">O</div><b>Output</b><span>Artifact cần nhận?</span></div>
+    <div class="step"><div class="bubble">E</div><b>Evaluation</b><span>Thế nào là đạt?</span></div>
+  </div>
+  <div class="footer"><span>Task là phần quan trọng nhất; Role chỉ dùng khi làm đổi cách xử lý</span><span>11</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Role & Task</div>
+  <h2>Góc nhìn hữu ích + động từ rõ</h2>
+  <div class="grid2">
+    <div class="card bad"><h3>Role phóng đại</h3><div class="prompt">“Đóng vai chuyên gia số một thế giới…”</div><p>Không bổ sung năng lực hay góc nhìn cụ thể.</p></div>
+    <div class="card good"><h3>Role có tác dụng</h3><div class="prompt">“Đóng vai người phụ trách đào tạo nội bộ có kinh nghiệm onboarding nhân viên mới.”</div></div>
+  </div>
+  <p class="lead">Task dùng động từ rõ: Explain · Extract · Classify · Compare · Analyze · Design · Evaluate · Rewrite.</p>
+  <div class="footer"><span>Role hỗ trợ Task; không thay thế Task</span><span>12</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Context & Constraints</div>
+  <h2>Context làm đúng tình huống; constraint giữ đúng biên</h2>
+  <div class="grid2">
+    <div class="card"><h3>Context</h3><ul><li>Ai dùng đầu ra?</li><li>Hoàn cảnh nào?</li><li>Đã có gì, còn thiếu gì?</li><li>Dữ liệu nền nào làm đổi kết quả?</li></ul></div>
+    <div class="card"><h3>Constraints</h3><ul><li>Tối đa 5 ngày, 3 giờ/ngày</li><li>Không dùng phần mềm trả phí</li><li>Không quá 6 nhóm nội dung</li><li>Mỗi nội dung phải có thực hành</li></ul></div>
+  </div>
+  <div class="footer"><span>Context không cần dài; chỉ cần đủ để đổi cách AI xử lý</span><span>13</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Output & Evaluation</div>
+  <h2>Biến “nội dung để đọc” thành “tài sản để dùng”</h2>
+  <div class="grid2">
+    <div class="card good"><h3>Output</h3><p>Bảng gồm: nhóm nội dung, mục tiêu học, thực hành, người phụ trách và bằng chứng hoàn thành.</p></div>
+    <div class="card"><h3>Evaluation</h3><ul><li>Đủ sản phẩm, quy trình sales, giao tiếp</li><li>Mỗi nhóm có hành vi quan sát được</li><li>Khả thi trong 5 ngày</li></ul></div>
+  </div>
+  <div class="footer"><span>Evaluation định nghĩa dấu hiệu của một output tốt</span><span>14</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Ví dụ RTC‑COE</div>
+  <h2>Onboarding sales: một prompt, một nhiệm vụ rõ</h2>
+  <table class="small">
+    <thead><tr><th>Thành phần</th><th>Nội dung rút gọn</th></tr></thead>
+    <tbody>
+      <tr><td><b>Role</b></td><td>Người phụ trách đào tạo nội bộ</td></tr>
+      <tr><td><b>Task</b></td><td>Thiết kế khung nội dung onboarding 5 ngày</td></tr>
+      <tr><td><b>Context</b></td><td>Sales B2B mới; công ty 20 người; manager + senior hướng dẫn</td></tr>
+      <tr><td><b>Constraints</b></td><td>3 giờ/ngày; tối đa 6 nhóm; mỗi nhóm có thực hành</td></tr>
+      <tr><td><b>Output</b></td><td>Bảng nội dung, mục tiêu, thực hành, owner, bằng chứng</td></tr>
+      <tr><td><b>Evaluation</b></td><td>Đủ năng lực cốt lõi, quan sát được, khả thi trong 5 ngày</td></tr>
+    </tbody>
+  </table>
+  <div class="footer"><span>Chưa làm lịch, checklist và rubric ở prompt này</span><span>15</span></div>
+</section>
+
+<section class="slide teal">
+  <div class="eyebrow">Giới hạn của RTC‑COE</div>
+  <h1>Prompt đủ thành phần<br><span class="hero-accent">vẫn có thể quá tải.</span></h1>
+  <div class="footer"><span>Vấn đề chuyển từ “thiếu cấu trúc” sang “quá nhiều task”</span><span>16</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Dấu hiệu quá tải</div>
+  <h2>Một prompt đang làm tám việc phụ thuộc nhau</h2>
+  <div class="grid2">
+    <div><ul><li>Xác định kết quả cần đạt</li><li>Quyết định nội dung</li><li>Sắp xếp thứ tự học</li><li>Lập lịch 5 ngày</li></ul></div>
+    <div><ul><li>Thiết kế hoạt động</li><li>Tạo checklist</li><li>Xây tiêu chí đánh giá</li><li>Tự kiểm tra tính khả thi</li></ul></div>
+  </div>
+  <div class="quote">Nếu bước đầu sai, mọi phần phía sau tiếp tục xây trên nền sai.</div>
+  <div class="footer"><span>Đây là lúc cần Task Decomposition</span><span>17</span></div>
+</section>
+
+<section class="slide blue">
+  <div class="eyebrow">Task Decomposition</div>
+  <h1>Chia bài toán theo<br><span class="hero-accent">logic đầu vào → đầu ra.</span></h1>
+  <div class="definition">Không chia nhỏ cho thật nhiều. Chia để biết việc nào phải làm trước.</div>
+  <div class="footer"><span>Buổi 2: decomposition quy trình nhiệm vụ · Buổi 3: decomposition miền tri thức</span><span>18</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Task Map onboarding</div>
+  <h2>Sáu task được suy ra từ những việc đang bị trộn</h2>
+  <table class="small">
+    <thead><tr><th>Step</th><th>Task</th><th>Expected output</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Xác định yêu cầu</td><td>Onboarding Requirements</td></tr>
+      <tr><td>2</td><td>Xây khung nội dung</td><td>Content Framework</td></tr>
+      <tr><td>3</td><td>Sắp tiến trình học</td><td>Learning Sequence</td></tr>
+      <tr><td>4</td><td>Lập lịch 5 ngày</td><td>5‑Day Onboarding Plan</td></tr>
+      <tr><td>5</td><td>Chuẩn bị triển khai</td><td>Implementation Checklist</td></tr>
+      <tr><td>6</td><td>Đánh giá toàn bộ</td><td>Reviewed Onboarding Pack</td></tr>
+    </tbody>
+  </table>
+  <div class="footer"><span>Kết quả decomposition là Task Map — chưa phải các prompt</span><span>19</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Dependency</div>
+  <h2>Chưa biết “học gì” thì chưa nên lập lịch “học ngày nào”</h2>
+  <div class="flow">
+    <div class="node primary">Requirements</div><div class="arrow">→</div>
+    <div class="node">Content<br>Framework</div><div class="arrow">→</div>
+    <div class="node">Learning<br>Sequence</div><div class="arrow">→</div>
+    <div class="node">5‑Day<br>Plan</div><div class="arrow">→</div>
+    <div class="node tealn">Checklist<br>& Review</div>
+  </div>
+  <div class="footer"><span>Output trước trở thành input có ý nghĩa cho bước sau</span><span>20</span></div>
+</section>
+
+<section class="slide teal">
+  <div class="eyebrow">Prompt Stack</div>
+  <h1>Task Map quyết định bước.<br><span class="hero-accent">RTC‑COE thiết kế từng prompt.</span></h1>
+  <div class="footer"><span>Prompt Stack nối các bước bằng dependency và checkpoint</span><span>21</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Năm thuật ngữ cần phân biệt</div>
+  <h2>Task, step, prompt, stack và phase không phải một thứ</h2>
+  <table>
+    <thead><tr><th>Thuật ngữ</th><th>Nghĩa</th></tr></thead>
+    <tbody>
+      <tr><td><b>Task</b></td><td>Một nhiệm vụ cần hoàn thành</td></tr>
+      <tr><td><b>Step</b></td><td>Vị trí của task trong quy trình</td></tr>
+      <tr><td><b>Prompt</b></td><td>Hướng dẫn để AI thực hiện task</td></tr>
+      <tr><td><b>Prompt Stack</b></td><td>Toàn bộ chuỗi prompt có dependency</td></tr>
+      <tr><td><b>Phase</b></td><td>Nhóm nhiều step cùng mục tiêu lớn; chỉ dùng khi cần</td></tr>
+    </tbody>
+  </table>
+  <div class="footer"><span>Trong Buổi 2, ưu tiên dùng “step” thay vì “phase”</span><span>22</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Không có stack cứng</div>
+  <h2>Clarify → Structure → Design → Critique → Refine chỉ là một pattern</h2>
+  <div class="grid3">
+    <div class="card"><h3>Viết báo cáo</h3><p>Collect → Organize → Analyze → Draft → Review</p></div>
+    <div class="card"><h3>Chọn nhà cung cấp</h3><p>Criteria → Options → Compare → Risks → Recommend</p></div>
+    <div class="card"><h3>Xử lý khiếu nại</h3><p>Understand → Classify → Options → Select → Draft</p></div>
+  </div>
+  <div class="footer"><span>Step phải sinh ra từ Task Decomposition của bài toán thật</span><span>23</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Cấu trúc một step</div>
+  <h2>Metadata của step không thay thế RTC‑COE</h2>
+  <div class="grid2">
+    <div class="card good"><h3>Vị trí trong stack</h3><ul><li><b>Purpose:</b> vì sao step tồn tại?</li><li><b>Input:</b> nhận dữ liệu nào?</li><li><b>Expected output:</b> artifact nào?</li><li><b>Checkpoint:</b> đủ điều kiện đi tiếp?</li></ul></div>
+    <div class="card"><h3>Prompt bên trong step</h3><ul><li>Role</li><li>Task</li><li>Context + Constraints</li><li>Output + Evaluation</li></ul></div>
+  </div>
+  <div class="footer"><span>Purpose/Input/Expected output/Checkpoint là metadata của step</span><span>24</span></div>
+</section>
+
+<section class="slide blue">
+  <div class="eyebrow">Checkpoint</div>
+  <h1>Không phải “đã chạy xong?”<br><span class="hero-accent">Mà là “đã đủ tốt để đi tiếp?”</span></h1>
+  <div class="footer"><span>Checkpoint ngăn lỗi lan sang toàn bộ stack</span><span>25</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Ví dụ checkpoint sau Content Framework</div>
+  <h2>Bốn câu hỏi quyết định đi tiếp hay quay lại</h2>
+  <div class="check">
+    <div>✓ Bao phủ mục tiêu onboarding?</div>
+    <div>✓ Có nhóm nội dung trùng lặp?</div>
+    <div>✓ Mỗi nhóm gắn với hành vi quan sát được?</div>
+    <div>✓ Đủ dữ liệu để thiết kế Learning Sequence?</div>
+  </div>
+  <p class="lead">Không đạt → bổ sung input hoặc sửa prompt Step 2. Đạt → chuyển Step 3.</p>
+  <div class="footer"><span>Checkpoint biến chuỗi prompt thành quy trình có kiểm soát</span><span>26</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Ví dụ hoàn chỉnh</div>
+  <h2>Prompt Stack onboarding sales chạy qua 6 artifact</h2>
+  <table class="small">
+    <thead><tr><th>Step</th><th>Prompt làm gì?</th><th>Checkpoint chính</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Biến Framing Brief thành Requirements</td><td>Mục tiêu và thông tin thiếu đã rõ?</td></tr>
+      <tr><td>2</td><td>Requirements → Content Framework</td><td>Bao phủ, không trùng, quan sát được?</td></tr>
+      <tr><td>3</td><td>Content → Learning Sequence</td><td>Prerequisite và thứ tự hợp lý?</td></tr>
+      <tr><td>4</td><td>Sequence → kế hoạch 5 ngày</td><td>≤ 3 giờ/ngày, có thực hành?</td></tr>
+      <tr><td>5</td><td>Plan → checklist triển khai</td><td>Mọi việc có owner và deadline?</td></tr>
+      <tr><td>6</td><td>Audit toàn bộ onboarding pack</td><td>Sẵn sàng hay quay lại step nào?</td></tr>
+    </tbody>
+  </table>
+  <div class="footer"><span>Mỗi prompt vẫn được thiết kế và audit bằng RTC‑COE</span><span>27</span></div>
+</section>
+
+<section class="slide exercise">
+  <div class="eyebrow">Thực hành 1</div><div class="timer">8 phút</div>
+  <h2>Từ prompt cảm tính đến RTC‑COE</h2>
+  <div class="grid2">
+    <div><h3>Chọn 2 prompt cũ</h3><ol><li>Gạch chân động từ nhiệm vụ</li><li>Đánh dấu thành phần RTC‑COE đã có</li><li>Chỉ ra phần thiếu hoặc mơ hồ</li></ol></div>
+    <div><h3>Viết lại</h3><ol><li>Giữ một task chính</li><li>Thêm context làm đổi kết quả</li><li>Gọi tên output và tiêu chí đạt</li></ol></div>
+  </div>
+  <div class="footer"><span>So sánh output cũ và output mới, không chỉ so độ dài prompt</span><span>28</span></div>
+  <aside class="notes">Mời học viên audit theo sáu ô RTC‑COE. Nhấn mạnh không bắt buộc phải viết đủ sáu nhãn trong prompt đơn giản.</aside>
+</section>
+
+<section class="slide exercise">
+  <div class="eyebrow">Thực hành 2</div><div class="timer">12 phút</div>
+  <h2>Bóc một prompt quá tải thành Task Map</h2>
+  <div class="prompt" style="margin-bottom:3%">“Thiết kế chương trình đào tạo CSKH gồm phân tích nhu cầu, khung năng lực, lịch học, tài liệu, bài tập, checklist và rubric.”</div>
+  <div class="grid2"><div><h3>Hãy xác định</h3><ul><li>3–6 task</li><li>Input và output từng task</li><li>Dependency trước–sau</li></ul></div><div><h3>Và viết</h3><ul><li>Checkpoint cho ít nhất 2 step</li><li>Lý do gộp hoặc tách step</li></ul></div></div>
+  <div class="footer"><span>Kết quả là Task Map, chưa cần viết prompt</span><span>29</span></div>
+</section>
+
+<section class="slide exercise">
+  <div class="eyebrow">Thực hành 3</div><div class="timer">15 phút</div>
+  <h2>Chuyển Task Map thành Prompt Stack V1</h2>
+  <div class="grid2">
+    <div><h3>Mỗi step có</h3><ul><li>Purpose + Input</li><li>Prompt audit bằng RTC‑COE</li><li>Expected output</li><li>Checkpoint</li></ul></div>
+    <div><h3>Toàn stack có</h3><ul><li>3–6 prompt</li><li>Output chaining có ý nghĩa</li><li>Ít nhất 2 checkpoint</li><li>Critique/refine chỉ khi thật cần</li></ul></div>
+  </div>
+  <div class="footer"><span>Test bằng dữ liệu thật và ghi lại nơi AI tự giả định</span><span>30</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">8 lỗi phổ biến</div>
+  <h2>Stack nhìn “có vẻ bài bản” vẫn có thể sai logic</h2>
+  <div class="grid2">
+    <div><ul><li>RTC‑COE thành mẫu điền máy móc</li><li>Role phóng đại</li><li>Danh sách prompt rời bị gọi là stack</li><li>Decomposition theo “tổng quan → chi tiết”</li></ul></div>
+    <div><ul><li>Một step làm thay toàn stack</li><li>Không có checkpoint</li><li>Quá nhiều step vụn</li><li>Không test bằng dữ liệu thật</li></ul></div>
+  </div>
+  <div class="footer"><span>Đánh giá stack bằng logic và artifact, không bằng văn phong AI</span><span>31</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Assignment Buổi 2</div>
+  <h2>Prompt Stack V1 cho domain thật của bạn</h2>
+  <div class="taskline">
+    <div class="task"><b>A</b><span>Prompt ban đầu</span></div>
+    <div class="task"><b>B</b><span>RTC‑COE Audit</span></div>
+    <div class="task"><b>C</b><span>Task Decomposition</span></div>
+    <div class="task"><b>D</b><span>Prompt Stack V1</span></div>
+    <div class="task"><b>E</b><span>Test Log</span></div>
+  </div>
+  <p class="lead">Sản phẩm cần có 3–6 step, ít nhất 2 checkpoint và một lần sửa sau test.</p>
+  <div class="footer"><span>Artifact này sẽ là đầu vào cho Buổi 3</span><span>32</span></div>
+</section>
+
+<section class="slide dark">
+  <div class="eyebrow">Tự kiểm cuối buổi</div>
+  <h2>Bạn đã tạo được một stack có logic?</h2>
+  <div class="check">
+    <div>✓ Prompt cũ đã được audit</div>
+    <div>✓ Task Map có dependency</div>
+    <div>✓ Mỗi step có một task chính</div>
+    <div>✓ Output trước nối input sau</div>
+    <div>✓ Checkpoint quyết định đi tiếp</div>
+    <div>✓ Stack đã test và sửa</div>
+  </div>
+  <div class="footer"><span>Đầu ra: Prompt Stack V1 có thể sử dụng trong công việc thật</span><span>33</span></div>
+</section>
+
+<section class="slide blue">
+  <div class="eyebrow">Câu chốt Buổi 2</div>
+  <h1>Đừng bắt một prompt<br><span class="hero-accent">làm tất cả.</span></h1>
+  <div class="definition">Làm rõ bài toán → bóc task → thiết kế từng prompt đúng step → kiểm tra trước khi đi tiếp.</div>
+  <div class="footer"><span>RTC‑COE thiết kế prompt · Task Map thiết kế stack</span><span>34</span></div>
+</section>
+
+</main>
+<div class="progress"></div>
+<div class="overview" aria-label="Tổng quan slide"></div>
+<script>
+(() => {
+  const slides = [...document.querySelectorAll(".slide")];
+  const bar = document.querySelector(".progress");
+  const overview = document.querySelector(".overview");
+  let current = 0;
+
+  slides.forEach((slide, index) => {
+    const thumb = document.createElement("button");
+    thumb.className = "thumb";
+    thumb.type = "button";
+    const title = slide.querySelector("h1,h2");
+    thumb.textContent = `${index + 1}. ${title ? title.textContent.trim() : "Slide"}`;
+    thumb.addEventListener("click", () => {
+      document.body.classList.remove("show-overview");
+      show(index);
+    });
+    overview.appendChild(thumb);
+  });
+
+  function show(index) {
+    current = Math.max(0, Math.min(slides.length - 1, index));
+    slides.forEach((s, i) => s.classList.toggle("active", i === current));
+    bar.style.width = `${((current + 1) / slides.length) * 100}%`;
+    history.replaceState(null, "", `#${current + 1}`);
+  }
+
+  function fullscreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "ArrowRight" || event.key === " " || event.key === "PageDown") show(current + 1);
+    if (event.key === "ArrowLeft" || event.key === "PageUp") show(current - 1);
+    if (event.key === "Home") show(0);
+    if (event.key === "End") show(slides.length - 1);
+    if (event.key.toLowerCase() === "f") fullscreen();
+    if (event.key.toLowerCase() === "n") document.body.classList.toggle("show-notes");
+    if (event.key.toLowerCase() === "o") document.body.classList.toggle("show-overview");
+    if (event.key === "Escape") document.body.classList.remove("show-overview", "show-notes");
+  });
+
+  let startX = 0;
+  document.addEventListener("touchstart", e => startX = e.changedTouches[0].screenX, {passive:true});
+  document.addEventListener("touchend", e => {
+    const delta = e.changedTouches[0].screenX - startX;
+    if (Math.abs(delta) > 45) show(current + (delta < 0 ? 1 : -1));
+  }, {passive:true});
+
+  const hashIndex = Number(location.hash.slice(1)) - 1;
+  show(Number.isFinite(hashIndex) && hashIndex >= 0 ? hashIndex : 0);
+})();
+</script>
+</body>
+</html>
