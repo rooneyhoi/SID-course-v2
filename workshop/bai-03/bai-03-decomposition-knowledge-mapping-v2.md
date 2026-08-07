@@ -141,7 +141,7 @@ Nói ngắn gọn:
 |---|---|
 | Decomposition | Bóc một chủ đề lớn thành các phần nhỏ hơn |
 | Top-down | Chia từ tổng quan đến chi tiết |
-| Functional | Chia theo chức năng và dòng xử lý input-output |
+| Functional | Chia theo dòng chức năng và xử lý input-output |
 | Stakeholder-based | Chia theo góc nhìn của từng bên liên quan |
 | Node | Một điểm nội dung trong cây (nhánh, lá, cụm) |
 | MECE-ish | Cố gắng không trùng lớn và không thiếu lớn |
@@ -202,13 +202,13 @@ Lưu ý: một domain không có duy nhất 1 cách chia đúng. Có cách chia 
 
 Functional decomposition trả lời:
 
-> Từ input đến output, hệ thống này cần các chức năng nào và theo thứ tự nào?
+> Từ input đến output, hệ thống này cần những bước chức năng nào và theo thứ tự nào?
 
 ### 5.2 Cách làm
 
 1. Xác định workflow trung tâm (ví dụ: dùng AI thiết kế module học).
 2. Liệt kê các bước từ đầu vào đến đầu ra.
-3. Với 1-2 bước quan trọng, bóc tiếp thành sub-function.
+3. Với 1-2 bước quan trọng, bóc tiếp thành các bước chức năng nhỏ hơn.
 
 ### 5.3 Output mẫu
 
@@ -217,8 +217,8 @@ Workflow: [Tên workflow]
 
 1. [Chức năng 1]
 2. [Chức năng 2]
-   2.1 [Sub-function]
-   2.2 [Sub-function]
+   2.1 [Bước chức năng nhỏ]
+   2.2 [Bước chức năng nhỏ]
 3. [Chức năng 3]
 ```
 
@@ -422,14 +422,148 @@ Viết đoạn 150-250 từ:
 
 ---
 
-## 11. Rubric tự chấm
+## 11. Prompt mẫu để luyện tập
+
+Hai prompt dưới đây được viết để khớp với logic của Buổi 1 và Buổi 2:
+
+- Buổi 1: luôn bắt đầu từ Framing Brief, không để AI tự đoán chủ đề.
+- Buổi 2: prompt có role, task, context, output và tự kiểm tra rõ ràng.
+- Buổi 3: yêu cầu AI tạo đúng các artifact decomposition, không trả lời lan man.
+
+### 11.1 Prompt mẫu chuẩn cho hầu hết mọi chủ đề
+
+Prompt này dùng khi bạn muốn bóc một chủ đề bất kỳ theo 3 cách, rồi so sánh để chọn cách nhìn phù hợp nhất.
+
+```text
+Tôi đang làm việc với chủ đề sau:
+
+[FRAMING BRIEF]
+- Topic:
+- Problem:
+- Audience:
+- Context:
+- Scope:
+- Output mong muốn:
+- Task type:
+
+Hãy đóng vai một learning designer kiêm knowledge architect.
+
+Nhiệm vụ:
+Giúp tôi tạo decomposition cho chủ đề trên theo 3 cách khác nhau để tôi có thể chọn cách nhìn phù hợp nhất.
+
+Yêu cầu cụ thể:
+
+1. Tạo Top-down Decomposition
+- Bóc chủ đề thành cây 3-4 tầng.
+- Cấp 1 phải dùng cùng một tiêu chí phân loại.
+- Tránh trùng lặp lớn giữa các nhánh.
+- Tổng số node tối thiểu: 15.
+
+2. Tạo Functional Decomposition
+- Xem chủ đề này như một workflow hoặc dòng công việc.
+- Liệt kê các bước chính từ input đến output.
+- Nếu cần, bóc 1-2 bước thành các bước chức năng nhỏ hơn.
+
+3. Tạo Stakeholder Decomposition
+- Xác định 3-5 stakeholder chính liên quan đến chủ đề.
+- Với mỗi stakeholder, nêu rõ:
+   - họ kỳ vọng gì,
+   - họ sợ điều gì,
+   - họ cần tri thức hoặc năng lực gì,
+   - họ sẽ dùng kết quả này như thế nào.
+
+4. So sánh 3 cách decomposition
+- Với mỗi cách, cho biết:
+   - nó giúp nhìn rõ điều gì,
+   - phù hợp khi nào,
+   - hạn chế là gì,
+   - nên ưu tiên cách nào với Framing Brief hiện tại và vì sao.
+
+5. Tự kiểm tra chất lượng output
+- Chỉ ra nếu có nhánh trùng nhau, cấp chưa đồng dạng, hoặc stakeholder còn quá chung chung.
+- Nếu thấy vấn đề, hãy tự sửa rồi mới đưa bản cuối.
+
+Định dạng đầu ra:
+Phần A - Top-down Decomposition
+Phần B - Functional Decomposition
+Phần C - Stakeholder Decomposition
+Phần D - Bảng so sánh 3 cách
+Phần E - Khuyến nghị nên dùng cách nào trước
+
+Ràng buộc:
+- Viết dễ hiểu cho người không chuyên kỹ thuật.
+- Không dùng thuật ngữ học thuật nếu không cần.
+- Ưu tiên tính rõ ràng và khả năng dùng ngay để thiết kế nội dung, chatbot, khóa học hoặc workflow.
+```
+
+### 11.2 Prompt mẫu cho use case chatbot
+
+Prompt này dùng khi bạn muốn nối Buổi 2 và Buổi 3 rõ hơn, đặc biệt cho team đang thiết kế chatbot hoặc assistant.
+
+```text
+Tôi đang thiết kế một chatbot với Framing Brief như sau:
+
+[FRAMING BRIEF]
+- Topic:
+- Problem:
+- Audience:
+- Context:
+- Scope:
+- Output mong muốn:
+- Task type:
+
+Hãy đóng vai conversation designer kiêm AI product strategist.
+
+Nhiệm vụ:
+Giúp tôi bóc chủ đề này thành các lớp decomposition cần thiết để thiết kế chatbot hiệu quả.
+
+Yêu cầu:
+
+1. Tạo Top-down Decomposition cho miền tri thức
+- Bóc domain thành cây nội dung 3-4 tầng.
+- Chỉ ra chatbot cần biết những cụm kiến thức nào.
+
+2. Tạo Functional Decomposition cho hành trình xử lý
+- Mô tả workflow từ lúc người dùng vào cuộc trò chuyện đến khi đạt outcome.
+- Chỉ ra các bước chính như: chào, làm rõ nhu cầu, đề xuất, xử lý phản đối, chốt bước tiếp theo, escalation.
+
+3. Tạo Stakeholder Decomposition
+- Liệt kê các bên liên quan chính: người dùng cuối, người vận hành, đội nội dung, đội kỹ thuật, người phê duyệt nghiệp vụ.
+- Với mỗi bên, nêu rõ kỳ vọng, nỗi lo và nhu cầu thông tin.
+
+4. So sánh output của 3 cách decomposition
+- Cách nào giúp thiết kế knowledge base?
+- Cách nào giúp thiết kế conversation flow?
+- Cách nào giúp thiết kế governance và vận hành?
+
+5. Khuyến nghị thứ tự ưu tiên
+- Nếu chỉ làm trước 1-2 artifact, hãy đề xuất nên làm gì trước và vì sao.
+
+Định dạng đầu ra:
+Phần A - Domain Tree
+Phần B - Functional Workflow
+Phần C - Stakeholder Map
+Phần D - So sánh và khuyến nghị
+
+Ràng buộc:
+- Viết thực tế, dễ triển khai.
+- Không chỉ mô tả đẹp mà phải hướng đến artifact team có thể dùng ngay.
+```
+
+Nói ngắn gọn:
+
+> Prompt mẫu tốt của Buổi 3 phải bắt đầu từ Framing Brief, yêu cầu nhiều góc decomposition khác nhau, và buộc AI so sánh output thay vì chỉ tạo một danh sách ý.
+
+---
+
+## 12. Rubric tự chấm
 
 | Tiêu chí | Câu hỏi kiểm tra | Điểm |
 |---|---|---:|
 | Logic cấp 1 | Các nhánh cấp 1 có đồng dạng không? | /5 |
 | Breadth | Có bao quát đủ phần quan trọng của domain không? | /5 |
 | Rõ cấp 2-3 | Node cùng cấp có ít trùng lặp và dễ phân biệt không? | /5 |
-| Map bổ sung | Functional/Stakeholder map có dùng được trong thực tế không? | /5 |
+| Map bổ sung | Functional map hoặc Stakeholder map có dùng được trong thực tế không? | /5 |
 | Tính dạy được | Nhìn vào cây/map có dạy ngay thành buổi học được không? | /5 |
 | Clarity | Tài liệu có mạch lạc, người mới đọc có theo được không? | /5 |
 
@@ -441,12 +575,12 @@ Thang điểm gợi ý:
 
 ---
 
-## 12. Kết nối sang Buổi 4
+## 13. Kết nối sang Buổi 4
 
 Buổi 4 sẽ dùng chính các artifact này để làm Information Architecture:
 
 1. Từ Decomposition Tree -> chuẩn hóa taxonomy và hierarchy.
-2. Từ Functional/Stakeholder map -> thiết kế matrix và luồng điều hướng nội dung.
+2. Từ Functional map hoặc Stakeholder map -> thiết kế matrix và luồng điều hướng nội dung.
 
 Nói ngắn gọn:
 
@@ -454,12 +588,12 @@ Nói ngắn gọn:
 
 ---
 
-## 13. Tự kiểm cuối buổi
+## 14. Tự kiểm cuối buổi
 
 Trước khi chuyển sang Buổi 4, tự trả lời 5 câu:
 
 1. Tôi đã có cây 3-4 tầng cho domain thật của mình chưa?
-2. Tôi đã có ít nhất 1 map bổ sung (functional hoặc stakeholder) chưa?
+2. Tôi đã có ít nhất 1 map bổ sung (Functional hoặc Stakeholder) chưa?
 3. Tôi có biết node nào trùng lặp và cách sửa không?
 4. Tôi có thể dùng cây/map này để dạy người khác không?
 5. Tôi có biết cách biến cây/map thành taxonomy ở Buổi 4 không?
