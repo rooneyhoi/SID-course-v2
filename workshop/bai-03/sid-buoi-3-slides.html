@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Buổi 3 — Decomposition & Knowledge Mapping</title>
+<style>
+  :root{
+    --ink:#15233b;--muted:#66738a;--paper:#f6f3ec;--white:#fff;
+    --blue:#2563eb;--cyan:#0ea5a6;--coral:#ef6a5b;--gold:#f2b84b;
+    --line:#d9dfeb;--soft:#eaf1ff;--soft2:#e9f7f5;--shadow:0 18px 60px rgba(24,36,60,.14);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#111827;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink)}
+  .deck{height:100%;display:grid;place-items:center}
+  .slide{
+    display:none;position:relative;width:min(100vw,177.78vh);height:min(100vh,56.25vw);
+    min-width:320px;overflow:hidden;background:var(--paper);padding:5.4% 6.2% 5%;
+    box-shadow:var(--shadow)
+  }
+  .slide.active{display:flex;flex-direction:column}
+  .slide::after{content:"";position:absolute;right:-9%;bottom:-30%;width:34%;height:60%;border-radius:50%;background:rgba(37,99,235,.06)}
+  .slide.dark{background:var(--ink);color:var(--white)}
+  .slide.blue{background:linear-gradient(135deg,#183f92,#2563eb);color:var(--white)}
+  .slide.teal{background:linear-gradient(135deg,#0f5355,#0ea5a6);color:var(--white)}
+  .eyebrow{font-size:clamp(12px,1.05vw,20px);letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--blue);margin-bottom:1.4%}
+  .dark .eyebrow,.blue .eyebrow,.teal .eyebrow{color:#9fe8e3}
+  h1{font-size:clamp(36px,5.1vw,84px);line-height:1.02;letter-spacing:-.045em;margin:0;max-width:88%}
+  h2{font-size:clamp(28px,3.3vw,58px);line-height:1.08;letter-spacing:-.035em;margin:0 0 2.4%;max-width:95%}
+  h3{font-size:clamp(18px,1.65vw,30px);line-height:1.18;margin:0 0 .7em}
+  p,li,td,th{font-size:clamp(14px,1.34vw,24px);line-height:1.42}
+  p{margin:.3em 0 .85em}.lead{font-size:clamp(20px,2vw,36px);line-height:1.35;max-width:80%;color:var(--muted)}
+  .dark .lead,.blue .lead,.teal .lead{color:#dce7fb}
+  .hero-accent{color:#72ddd4}.accent{color:var(--blue)}.coral{color:var(--coral)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:4%;align-items:stretch;flex:1}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5%;align-items:stretch;flex:1}
+  .card{background:rgba(255,255,255,.86);border:1px solid var(--line);border-radius:18px;padding:5%;box-shadow:0 8px 28px rgba(24,36,60,.06)}
+  .card.bad{border-top:7px solid var(--coral)}.card.good{border-top:7px solid var(--cyan)}
+  .card h3{display:flex;align-items:center;gap:.5em}.num{font-size:.75em;color:var(--blue)}
+  .quote{font-size:clamp(20px,2.25vw,40px);line-height:1.35;font-weight:700;max-width:85%;padding-left:3%;border-left:8px solid var(--gold)}
+  .prompt{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:clamp(12px,1.05vw,19px);line-height:1.5;background:#fff;border:1px solid var(--line);border-radius:15px;padding:4%;color:#24324a}
+  .good .prompt{background:#f1fbf8}.bad .prompt{background:#fff7f5}
+  ul{margin:.2em 0;padding-left:1.2em}li{margin:.3em 0}li::marker{color:var(--blue)}
+  .big-word{font-size:clamp(54px,9vw,150px);font-weight:900;letter-spacing:-.07em;line-height:.9}
+  .definition{margin-top:auto;font-size:clamp(21px,2.2vw,40px);font-weight:700;max-width:90%}
+  .flow{display:flex;align-items:center;justify-content:center;gap:1.3%;flex:1}
+  .node{position:relative;background:#fff;border:1px solid var(--line);border-radius:16px;padding:2.2% 1.6%;min-width:14%;text-align:center;font-size:clamp(12px,1.15vw,21px);font-weight:750;z-index:1}
+  .node.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.node.tealn{background:var(--cyan);color:#fff;border-color:var(--cyan)}
+  .arrow{font-size:clamp(22px,3vw,50px);color:var(--blue);font-weight:400}
+  .branch{display:grid;grid-template-columns:28% 1fr;gap:4%;align-items:center;flex:1}
+  .root{background:var(--blue);color:#fff;border-radius:24px;padding:10% 7%;text-align:center;font-size:clamp(18px,1.8vw,32px);font-weight:800}
+  .leaves{display:grid;grid-template-columns:1fr 1fr;gap:5%}.leaf{background:#fff;border-left:7px solid var(--cyan);padding:4.5%;border-radius:12px;font-size:clamp(14px,1.25vw,23px);font-weight:700}
+  .three-leaves{display:grid;grid-template-columns:repeat(3,1fr);gap:3%}.leaf{background:#fff;border-left:7px solid var(--cyan);padding:4%;border-radius:12px;font-size:clamp(13px,1.15vw,21px);font-weight:700}
+  .six{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5%;flex:1}
+  .step{background:#fff;border:1px solid var(--line);border-radius:16px;padding:6%;position:relative}
+  .step b{display:block;font-size:clamp(19px,1.65vw,30px);margin:.2em 0}.step span{font-size:clamp(12px,1.08vw,20px);color:var(--muted)}
+  .bubble{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:#fff;font-weight:900}
+  table{border-collapse:collapse;width:100%;background:#fff;border-radius:14px;overflow:hidden}
+  th{background:var(--ink);color:#fff;text-align:left;padding:1.8% 2%}
+  td{padding:1.55% 2%;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:0}.small td,.small th{font-size:clamp(11px,1.02vw,18px);padding:1.05% 1.4%}
+  .tree-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:3%;font-family:ui-monospace,Menlo,monospace;font-size:clamp(11px,1vw,17px);line-height:1.6;color:#24324a;max-height:300px;overflow-y:auto}
+  .inside{color:var(--cyan)}.outside{color:var(--coral)}
+  .taskline{display:grid;grid-template-columns:repeat(5,1fr);gap:1.5%;align-items:center;flex:1}
+  .task{background:#fff;border-top:7px solid var(--blue);border-radius:14px;padding:10% 6%;text-align:center}
+  .task b{display:block;font-size:clamp(16px,1.35vw,25px);margin-bottom:.4em}.task span{font-size:clamp(11px,.95vw,17px);color:var(--muted)}
+  .brief{display:grid;grid-template-columns:1.1fr .9fr;gap:5%;flex:1;align-items:center}
+  .brief-center{width:85%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;text-align:center;background:var(--blue);color:#fff;font-size:clamp(20px,2vw,36px);font-weight:900;padding:12%}
+  .brief-list{display:grid;gap:3%}.brief-item{background:#fff;border-left:7px solid var(--cyan);border-radius:12px;padding:3% 4%;font-size:clamp(13px,1.15vw,21px);font-weight:700}
+  .exercise{background:var(--ink);color:#fff}.exercise .eyebrow{color:var(--gold)}
+  .timer{position:absolute;right:6.2%;top:6%;font-size:clamp(12px,1vw,18px);color:#b8c6dd}
+  .check{display:grid;grid-template-columns:repeat(2,1fr);gap:3%;margin-top:1%}.check div{background:#fff;color:var(--ink);border-radius:14px;padding:3%;font-size:clamp(13px,1.2vw,22px);font-weight:700}
+  .footer{position:absolute;left:6.2%;right:6.2%;bottom:2.3%;display:flex;justify-content:space-between;color:var(--muted);font-size:clamp(10px,.8vw,15px);z-index:2}
+  .dark .footer,.blue .footer,.teal .footer,.exercise .footer{color:#aebbd0}
+  .progress{position:fixed;left:0;bottom:0;height:5px;background:var(--cyan);transition:width .25s;z-index:20}
+  .help{position:fixed;right:16px;top:14px;color:#fff;font-size:12px;opacity:.55;z-index:30}
+  .notes{display:none;position:absolute;left:6%;right:6%;bottom:7%;z-index:10;background:#111827;color:#fff;padding:2%;border-radius:12px;font-size:clamp(12px,1vw,18px);box-shadow:var(--shadow)}
+  body.show-notes .active .notes{display:block}
+  .overview{display:none;position:fixed;inset:0;z-index:50;background:#111827;padding:2%;overflow:auto;grid-template-columns:repeat(4,1fr);gap:14px}
+  body.show-overview .overview{display:grid}
+  .thumb{background:var(--paper);color:var(--ink);aspect-ratio:16/9;padding:7%;border-radius:8px;cursor:pointer;overflow:hidden;font-weight:800;font-size:clamp(10px,1vw,16px)}
+  .thumb:hover{outline:4px solid var(--cyan)}
+  @media(max-aspect-ratio:4/3){
+    .help{display:none}.slide{padding:6%}.grid2{gap:2.5%}.card{padding:4%}
+  }
+  @media print{
+    html,body{height:auto;overflow:visible;background:#fff}.deck{display:block}.slide{display:flex!important;page-break-after:always;width:13.333in;height:7.5in;box-shadow:none}.help,.progress,.overview{display:none!important}
+  }
+</style>
+</head>
+<body>
+<div class="help">← → chuyển slide · F toàn màn hình · N ghi chú · O tổng quan</div>
+<main class="deck">
+
+<section class="slide dark active">
+  <div class="eyebrow">SID · Buổi 3</div>
+  <h1>Decomposition &<br><span class="hero-accent">Knowledge Mapping</span></h1>
+  <p class="lead">Bóc tách chủ đề lớn thành bản đồ tri thức dễ dạy, dễ triển khai, dễ làm việc với AI</p>
+  <div class="footer"><span>Knowledge Architecture · Task Decomposition · Domain Mapping</span><span>01</span></div>
+  <aside class="notes">Buổi 3 là cầu nối giữa Prompt Stack (Buổi 2) và Information Architecture (Buổi 4). Nó giúp bạn nhìn toàn cảnh miền tri thức trước khi xây kiến trúc.</aside>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Bạn sẽ làm được gì?</div>
+  <h2>Sau buổi học, bạn có thể</h2>
+  <div class="grid2">
+    <ul style="font-size:clamp(15px,1.35vw,25px);line-height:1.65">
+      <li>Tách chủ đề lớn thành cây 3-4 tầng, không rối, không trùng</li>
+      <li>Phân biệt ba kiểu decomposition: Top-down, Functional, Stakeholder</li>
+      <li>Tạo hai artifact có thể dùng ngay: Decomposition Tree và Functional/Stakeholder map</li>
+    </ul>
+    <ul style="font-size:clamp(15px,1.35vw,25px);line-height:1.65">
+      <li>Tự kiểm chất lượng cây/map bằng checklist và rubric</li>
+      <li>Nối kết quả với Buổi 2 (Prompt Stack) và chuẩn bị cho Buổi 4</li>
+    </ul>
+  </div>
+  <div class="footer"><span>Decomposition là bước "dọn bàn" trước làm việc lớn</span><span>02</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Điều kiện tiên quyết</div>
+  <h2>Bạn nên mang theo từ Buổi 1–2</h2>
+  <div class="grid2">
+    <div class="card good"><h3>Từ Buổi 1: Framing Brief</h3><ul><li>Topic, Problem, Audience</li><li>Scope, Output, Task type</li><li>Scope định nghĩa giới hạn decomposition</li></ul></div>
+    <div class="card good"><h3>Từ Buổi 2: Prompt Stack V1</h3><ul><li>3-6 prompt có dependency</li><li>Ít nhất 2 checkpoint</li><li>Có output tạm để xem tính khả thi</li></ul></div>
+  </div>
+  <div class="footer"><span>Nếu chưa có, quay lại Buổi 1 hoặc 2 trước</span><span>03</span></div>
+</section>
+
+<section class="slide teal">
+  <div class="eyebrow">Tại sao phải decomposition?</div>
+  <h1>Hỏi AI "giải thích"<br><span class="hero-accent">thường nhận về nông.</span></h1>
+  <div class="definition">Decomposition giúp bạn thấy bức tranh tổng thể và biết cấp nào là khung, cấp nào là chi tiết.</div>
+  <div class="footer"><span>Không decomposition = không biết làm gì trước, làm gì sau</span><span>04</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Vấn đề khi không decomposition</div>
+  <h2>Prompt chung chung: "Mọi thứ tôi cần biết"</h2>
+  <div class="prompt" style="margin-bottom:3%">"Hãy giải thích chi tiết về chăm sóc khách hàng và đưa ra mọi thứ tôi cần biết để dạy nhân viên mới."</div>
+  <div class="grid3">
+    <div class="card bad"><p><b>Kết quả:</b> Rất nhiều ý hay, rất nhiều đoạn văn đẹp</p></div>
+    <div class="card bad"><p><b>Nhưng:</b> Khó xếp thành chương trình, framework hay quy trình</p></div>
+    <div class="card bad"><p><b>Rủi ro:</b> Dạy theo kiểu "nhảy ý", không chậm được</p></div>
+  </div>
+  <div class="footer"><span>Decomposition giảm rủi ro "làm rất nhiều nhưng lệch mục tiêu"</span><span>05</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Decomposition trong chatbot</div>
+  <h2>Tách rõ bốn lớp: Mục tiêu → Tri thức → Hội thoại → Vận hành</h2>
+  <div class="grid2">
+    <div class="card"><h3>Lớp mục tiêu</h3><p>Chatbot dùng để làm gì? Trả lời FAQ, tư vấn lựa chọn, hay thu lead?</p></div>
+    <div class="card"><h3>Lớp tri thức</h3><p>Chatbot cần biết: chính sách, sản phẩm, quy trình, tình huống ngoại lệ</p></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Lớp hội thoại</h3><p>Chatbot cần luồng nào? Mở đầu, làm rõ nhu cầu, đề xuất, chốt tiếp theo</p></div>
+    <div class="card"><h3>Lớp vận hành</h3><p>Đo chất lượng: tỉ lệ trả lời đúng, tỉ lệ chuyển đổi, escalation</p></div>
+  </div>
+  <div class="footer"><span>Nếu không tách, chatbot chỉ trả lời từng câu, không xây hành trình</span><span>06</span></div>
+</section>
+
+<section class="slide blue">
+  <div class="eyebrow">Ba kỹ thuật decomposition</div>
+  <h1>Cùng chủ đề,<br><span class="hero-accent">ba cách nhìn.</span></h1>
+  <div class="definition">Mỗi kỹ thuật tạo ra một loại bản đồ khác nhau.</div>
+  <div class="footer"><span>Top-down → bản đồ nội dung · Functional → bản đồ hành động · Stakeholder → bản đồ con người</span><span>07</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Top-down Decomposition</div>
+  <h2>Bóc chủ đề từ tổng quan xuống chi tiết: 3-4 tầng</h2>
+  <div class="tree-box">Chương trình đào tạo CSKH
+├─ 1. Nền tảng dịch vụ khách hàng
+│  ├─ 1.1 Vai trò CSKH
+│  ├─ 1.2 Tiêu chuẩn phục vụ cơ bản
+├─ 2. Kỹ năng giao tiếp
+│  ├─ 2.1 Chào hỏi, tạo thiện cảm
+│  ├─ 2.2 Đặt câu hỏi để hiểu nhu cầu
+│  ├─ 2.3 Giữ bình tĩnh khi khách khó chịu
+├─ 3. Xử lý tình huống
+│  ├─ 3.1 Khiếu nại phổ biến
+│  ├─ 3.2 Chuyển ca hoặc escalation
+  </div>
+  <p class="lead" style="margin-top:2%">Dùng khi cần: dựng syllabus, chia module, nhìn toàn cảnh nội dung</p>
+  <div class="footer"><span>Cấp 1 phải đồng dạy; tránh trộn "khái niệm" với "quy trình"</span><span>08</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Functional Decomposition</div>
+  <h2>Từ input → output: các bước chức năng chính</h2>
+  <table class="small" style="margin-bottom:2%">
+    <thead><tr><th>Bước</th><th>Chức năng</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Xác định chuẩn đầu ra sau đào tạo</td></tr>
+      <tr><td>2</td><td>Chọn các nhóm kỹ năng bắt buộc</td></tr>
+      <tr><td>3</td><td>Thiết kế nội dung theo thứ tự học</td></tr>
+      <tr><td>4</td><td>Tạo hoạt động thực hành cho từng kỹ năng</td></tr>
+      <tr><td>5</td><td>Kiểm tra mức độ đạt chuẩn</td></tr>
+      <tr><td>6</td><td>Theo dõi áp dụng sau đào tạo</td></tr>
+    </tbody>
+  </table>
+  <p class="lead">Dùng khi cần: thiết kế flow triển khai, phân công bước, xây checklist vận hành</p>
+  <div class="footer"><span>Workflow định rõ thứ tự và dependency giữa các bước</span><span>09</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Stakeholder Decomposition</div>
+  <h2>Mỗi bên liên quan: kỳ vọng, sợ, cần, dùng AI làm gì?</h2>
+  <div class="card" style="margin-bottom:2.5%"><h3>Nhân viên CSKH mới</h3><ul style="font-size:clamp(13px,1.25vw,22px)"><li><b>Kỳ vọng:</b> Hiểu việc nhanh, tự tin khi nói chuyện</li><li><b>Sợ:</b> Trả lời sai, bị khách phản ứng</li><li><b>Cần:</b> Kỹ năng giao tiếp, xử lý tình huống</li></ul></div>
+  <div class="card" style="margin-bottom:2.5%"><h3>Trưởng nhóm CSKH</h3><ul style="font-size:clamp(13px,1.25vw,22px)"><li><b>Kỳ vọng:</b> Nhân viên lên việc nhanh, giảm lỗi lặp</li><li><b>Sợ:</b> Đào tạo xong nhưng không áp dụng</li><li><b>Cần:</b> Tiêu chí quan sát, checklist kèm cặp</li></ul></div>
+  <div class="footer"><span>Dùng khi cần: cá nhân hóa nội dung, ưu tiên pain point thật</span><span>10</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">So sánh ba kỹ thuật</div>
+  <h2>Cùng chủ đề, ba bản đồ khác nhau</h2>
+  <table class="small">
+    <thead><tr><th>Kỹ thuật</th><th>Câu hỏi chính</th><th>Output</th><th>Dùng khi</th></tr></thead>
+    <tbody>
+      <tr><td><b>Top-down</b></td><td>Gồm phần nào?</td><td>Cây nội dung</td><td>Dựng syllabus</td></tr>
+      <tr><td><b>Functional</b></td><td>Bước nào tiếp?</td><td>Workflow</td><td>Thiết kế quy trình</td></tr>
+      <tr><td><b>Stakeholder</b></td><td>Bên nào cần gì?</td><td>Stakeholder map</td><td>Cá nhân hóa nội dung</td></tr>
+    </tbody>
+  </table>
+  <p class="lead" style="margin-top:2.5%">Thường dùng Top-down trước, sau đó chọn một map bổ sung phù hợp mục tiêu</p>
+  <div class="footer"><span>Cả ba kỹ thuật đều hữu ích; lựa chọn phụ thuộc vào bài toán</span><span>11</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Sai lầm phổ biến</div>
+  <h2>Khi vẽ decomposition tree</h2>
+  <div class="grid2">
+    <div class="card bad"><h3>1. Trộn loại cấp 1</h3><p>Ví dụ: "khái niệm" đứng cùng cấp với "quy trình" và "lỗi"</p></div>
+    <div class="card bad"><h3>2. Trùng ý cấp 2-3</h3><p>Đổi tên khác nhưng bản chất giống nhau</p></div>
+  </div>
+  <div class="grid2">
+    <div class="card bad"><h3>3. Chia theo cảm tính</h3><p>Thấy gì hay thì thêm, không theo tiêu chí</p></div>
+    <div class="card bad"><h3>4. Quá sâu hoặc quá cạn</h3><p>Nhiều hơn 4 tầng (khó dạy) hoặc chỉ 1-2 tầng (không rõ)</p></div>
+  </div>
+  <div class="footer"><span>Kiểm tra: Các nhánh cấp 1 có cùng loại không? Có node trùng?</span><span>12</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Checklist cách làm nhanh</div>
+  <h2>15-20 phút để có một decomposition tree đầu tiên</h2>
+  <div class="six">
+    <div class="step"><div class="bubble">1</div><b>Chọn tiêu chí</b><span>Nhóm năng lực, workflow, hoặc nội dung?</span></div>
+    <div class="step"><div class="bubble">2</div><b>Liệt kê cấp 1</b><span>3-7 nhánh theo cùng một tiêu chí</span></div>
+    <div class="step"><div class="bubble">3</div><b>Gắn cấp 2</b><span>Mỗi nhánh 3-6 node</span></div>
+    <div class="step"><div class="bubble">4</div><b>Kiểm tra</b><span>Trùng lặp? Tên không đồng dạy?</span></div>
+    <div class="step"><div class="bubble">5</div><b>Bổ sung cấp 3</b><span>Nếu cần dạy chi tiết hơn</span></div>
+    <div class="step"><div class="bubble">6</div><b>Self-review</b><span>Có dạy thành 3-5 buổi được?</span></div>
+  </div>
+  <div class="footer"><span>Cây đầu tiên không cần hoàn hảo; quan trọng là logic</span><span>13</span></div>
+</section>
+
+<section class="slide exercise">
+  <div class="eyebrow">Thực hành 1</div><div class="timer">10 phút</div>
+  <h2>Vẽ Top-down Decomposition Tree</h2>
+  <ul style="font-size:clamp(15px,1.35vw,25px);line-height:1.7;margin:2% 0">
+    <li>Lấy Framing Brief từ Buổi 1 của bạn</li>
+    <li>Chọn một tiêu chí chia cấp 1 (nhóm năng lực, workflow, hoặc kiến thức)</li>
+    <li>Liệt kê 3-7 nhánh cấp 1 theo cùng tiêu chí</li>
+    <li>Gắn 3-6 node cấp 2 cho mỗi nhánh</li>
+    <li>Kiểm tra: có node trùng hay loại không đồng dạy không?</li>
+  </ul>
+  <p class="lead">Output: một cây 3-4 tầng, tối thiểu 15 node</p>
+  <div class="footer"><span>Dùng markdown hoặc text cây để dễ sửa sau</span><span>14</span></div>
+</section>
+
+<section class="slide exercise">
+  <div class="eyebrow">Thực hành 2</div><div class="timer">8 phút</div>
+  <h2>Chọn một map bổ sung</h2>
+  <div class="grid2">
+    <div><h3>Lựa chọn A: Functional Map</h3><ul style="font-size:clamp(13px,1.25vw,22px)"><li>Xác định workflow chính</li><li>Liệt kê các bước từ input đến output</li><li>Bóc chi tiết 1-2 bước quan trọng</li></ul></div>
+    <div><h3>Lựa chọn B: Stakeholder Map</h3><ul style="font-size:clamp(13px,1.25vw,22px)"><li>Xác định 3-5 stakeholder chính</li><li>Với mỗi: kỳ vọng, sợ, cần, dùng AI</li><li>Chỉ ra pain point thực tế nhất</li></ul></div>
+  </div>
+  <p class="lead" style="margin-top:2%">Dùng cái nào hữu ích hơn với mục tiêu project của bạn</p>
+  <div class="footer"><span>Không cần làm cả hai; chọn cái hợp bài toán</span><span>15</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Kết nối sang Buổi 4</div>
+  <h2>Decomposition Tree trở thành Information Architecture</h2>
+  <div class="flow">
+    <div class="node primary">Decomposition<br>Tree</div><div class="arrow">→</div>
+    <div class="node">Taxonomy<br>Mapping</div><div class="arrow">→</div>
+    <div class="node">Information<br>Architecture</div><div class="arrow">→</div>
+    <div class="node tealn">Wireframe &<br>Navigation</div>
+  </div>
+  <p class="lead" style="margin-top:2%">Buổi 3 tạo bản đồ. Buổi 4 dùng bản đồ để xây kiến trúc thông tin.</p>
+  <div class="footer"><span>Artifact Buổi 3 là input cho Buổi 4</span><span>16</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Rubric tự chấm</div>
+  <h2>Đánh giá chất lượng cây/map của bạn</h2>
+  <table class="small">
+    <thead><tr><th>Tiêu chí</th><th>Câu hỏi</th><th style="text-align:center">Điểm</th></tr></thead>
+    <tbody>
+      <tr><td><b>Logic cấp 1</b></td><td>Các nhánh cấp 1 có đồng dạy không?</td><td style="text-align:center">/5</td></tr>
+      <tr><td><b>Bao quát</b></td><td>Có bao quát đủ phần quan trọng không?</td><td style="text-align:center">/5</td></tr>
+      <tr><td><b>Rõ cấp 2-3</b></td><td>Node có ít trùng lặp và dễ phân biệt không?</td><td style="text-align:center">/5</td></tr>
+      <tr><td><b>Map bổ sung</b></td><td>Functional/Stakeholder map dùng được không?</td><td style="text-align:center">/5</td></tr>
+      <tr><td><b>Dạy được</b></td><td>Có dạy ngay thành buổi học được không?</td><td style="text-align:center">/5</td></tr>
+    </tbody>
+  </table>
+  <p class="lead" style="margin-top:2%">Điểm ≥ 23/25: có thể mang sang Buổi 4. Điểm < 15: xem lại tiêu chí chia cấp 1.</p>
+  <div class="footer"><span>Đánh giá bằng logic và khả năng dùng, không bằng mỹ quan</span><span>17</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Mẹo giữ bài dễ hiểu</div>
+  <h2>Khi viết decomposition, giữ nhịp này</h2>
+  <div class="grid2">
+    <ul style="font-size:clamp(15px,1.35vw,25px);line-height:1.7">
+      <li>Nói rõ "làm để làm gì" trước lý thuyết</li>
+      <li>Mỗi kỹ thuật: cốt lõi → sai lầm → cách làm → output → checkpoint</li>
+      <li>Dùng một case xuyên suốt, không đổi liên tục</li>
+    </ul>
+    <ul style="font-size:clamp(15px,1.35vw,25px);line-height:1.7">
+      <li>Mỗi 1-2 phần có một dòng "Nói ngắn gọn"</li>
+      <li>Không mix metadata lẫn RTC-COE</li>
+      <li>Luôn có checkpoint, không bao giờ bỏ</li>
+    </ul>
+  </div>
+  <div class="footer"><span>Decomposition là kỹ năng, không phải lý thuyết trừu tượng</span><span>18</span></div>
+</section>
+
+<section class="slide teal">
+  <div class="eyebrow">Assignment Buổi 3</div>
+  <h1>Bạn nên tạo</h1>
+  <div class="definition">Decomposition Tree (3-4 tầng) + một map bổ sung (Functional hoặc Stakeholder)</div>
+  <div class="footer"><span>Artifact này là đầu vào cho Buổi 4: Information Architecture</span><span>19</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Assignment chi tiết</div>
+  <h2>Năm phần cần nộp</h2>
+  <div class="taskline">
+    <div class="task"><b>A</b><span>Framing<br>tóm tắt</span></div>
+    <div class="task"><b>B</b><span>Decomposition<br>Tree</span></div>
+    <div class="task"><b>C</b><span>Map bổ<br>sung</span></div>
+    <div class="task"><b>D</b><span>Lý giải<br>lựa chọn</span></div>
+    <div class="task"><b>E</b><span>Tự chấm<br>rubric</span></div>
+  </div>
+  <div style="margin-top:3%">
+    <p style="font-size:clamp(15px,1.35vw,25px)"><b>A:</b> 3-5 dòng tóm tắt Framing Brief (topic, audience, scope, output)</p>
+    <p style="font-size:clamp(15px,1.35vw,25px)"><b>B:</b> Cây 3-4 tầng, tối thiểu 15-20 node, cùng loại ở cấp 1</p>
+    <p style="font-size:clamp(15px,1.35vw,25px)"><b>C:</b> Functional map hoặc Stakeholder map (chọn cái phù hợp)</p>
+    <p style="font-size:clamp(15px,1.35vw,25px)"><b>D:</b> 150-250 từ: tại sao chọn tiêu chí như vậy? Giúp gì cho dự án?</p>
+    <p style="font-size:clamp(15px,1.35vw,25px)"><b>E:</b> Điểm rubric từng tiêu chí + ghi chú cần sửa trước Buổi 4</p>
+  </div>
+  <div class="footer"><span>Hạn chót: trước Buổi 4 ít nhất 3 ngày để có feedback</span><span>20</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Tự kiểm cuối buổi</div>
+  <h2>Năm câu trước khi chuyển Buổi 4</h2>
+  <div class="check">
+    <div>✓ Tôi đã có cây 3-4 tầng cho domain thật?</div>
+    <div>✓ Tôi đã có ít nhất 1 map bổ sung?</div>
+    <div>✓ Tôi có biết node nào trùng và cách sửa?</div>
+    <div>✓ Tôi có thể dùng cây/map này để dạy người khác?</div>
+    <div>✓ Tôi biết cách biến cây/map thành taxonomy ở Buổi 4?</div>
+    <div>✓ Nếu còn "chưa" ở câu nào, tôi sửa ngay trước học tiếp</div>
+  </div>
+  <div class="footer"><span>Artifact sạch = học Buổi 4 sẽ nhanh và chắc hơn</span><span>21</span></div>
+</section>
+
+<section class="slide dark">
+  <div class="eyebrow">Nói ngắn gọn</div>
+  <h1>Decomposition<br><span class="hero-accent">là bước "dọn bàn".</span></h1>
+  <div class="definition">Không dọn bàn: cái gì cũng quan trọng. Khi dọn bàn: biết phần nào làm trước, phần nào sau, phần nào chưa cần.</div>
+  <div class="footer"><span>Sau Buổi 3, bạn đã sẵn sàng cho Information Architecture</span><span>22</span></div>
+</section>
+
+</main>
+<div class="progress"></div>
+<div class="overview" aria-label="Tổng quan slide"></div>
+<script>
+(() => {
+  const slides = [...document.querySelectorAll(".slide")];
+  const bar = document.querySelector(".progress");
+  const overview = document.querySelector(".overview");
+  let current = 0;
+
+  slides.forEach((slide, index) => {
+    const thumb = document.createElement("button");
+    thumb.className = "thumb";
+    thumb.type = "button";
+    const title = slide.querySelector("h1,h2");
+    thumb.textContent = `${index + 1}. ${title ? title.textContent.trim() : "Slide"}`;
+    thumb.addEventListener("click", () => {
+      document.body.classList.remove("show-overview");
+      show(index);
+    });
+    overview.appendChild(thumb);
+  });
+
+  function show(index) {
+    current = Math.max(0, Math.min(slides.length - 1, index));
+    slides.forEach((s, i) => s.classList.toggle("active", i === current));
+    bar.style.width = `${((current + 1) / slides.length) * 100}%`;
+    history.replaceState(null, "", `#${current + 1}`);
+  }
+
+  function fullscreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "ArrowRight" || event.key === " " || event.key === "PageDown") show(current + 1);
+    if (event.key === "ArrowLeft" || event.key === "PageUp") show(current - 1);
+    if (event.key === "Home") show(0);
+    if (event.key === "End") show(slides.length - 1);
+    if (event.key.toLowerCase() === "f") fullscreen();
+    if (event.key.toLowerCase() === "n") document.body.classList.toggle("show-notes");
+    if (event.key.toLowerCase() === "o") document.body.classList.toggle("show-overview");
+    if (event.key === "Escape") document.body.classList.remove("show-overview", "show-notes");
+  });
+
+  let startX = 0;
+  document.addEventListener("touchstart", e => startX = e.changedTouches[0].screenX, {passive:true});
+  document.addEventListener("touchend", e => {
+    const delta = e.changedTouches[0].screenX - startX;
+    if (Math.abs(delta) > 45) show(current + (delta < 0 ? 1 : -1));
+  }, {passive:true});
+
+  const hashIndex = Number(location.hash.slice(1)) - 1;
+  show(Number.isFinite(hashIndex) && hashIndex >= 0 ? hashIndex : 0);
+})();
+</script>
+</body>
+</html>
