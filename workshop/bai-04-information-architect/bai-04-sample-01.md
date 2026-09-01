@@ -108,3 +108,7 @@
 - Matrix nhóm nội dung × stakeholder.
 - Flowchart quy trình lập và phê duyệt báo cáo.
 - Concept map nối dữ liệu, chỉ số, rủi ro và người ra quyết định.
+
+---
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*

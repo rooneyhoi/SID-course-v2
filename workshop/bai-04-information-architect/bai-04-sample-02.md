@@ -143,3 +143,7 @@ Từ dữ liệu trên, tạo một báo cáo Markdown dành cho Ban giám hiệ
 4. Flowchart quy trình kiểm tra đánh giá.
 5. Bảng tổng kết thành tích.
 6. Hạn chế dữ liệu và khuyến nghị hành động.
+
+---
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*

@@ -50,6 +50,7 @@ Sau buổi này, bạn có thể:
 ---
 
 ## 2. Vấn đề: cùng 1 nội dung, nhiều cách biểu diễn – không phải cách nào cũng tốt
+> Dữ liệu sẽ không có ý nghĩa cho đến khi nó được biểu diễn, sắp xếp để trở thành thông tin hữu ích
 
 ### 2.1. Biểu diễn không phải chuyện… trang trí
 
@@ -764,3 +765,5 @@ Buổi 5 sẽ mở rộng **chiều rộng & chiều sâu nghiên cứu**:
 - thiết kế research path.
 
 ---
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*
