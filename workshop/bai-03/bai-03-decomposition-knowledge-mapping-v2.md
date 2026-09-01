@@ -603,3 +603,5 @@ Nếu còn "chưa" ở câu nào, sửa ngay artifact trước khi học tiếp.
 ---
 
 *Nội dung được xây dựng theo hướng dẫn Structured Intelligence Design (SID) và được tinh chỉnh theo phong cách thân thiện, dễ hiểu của Buổi 1-2.*
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*

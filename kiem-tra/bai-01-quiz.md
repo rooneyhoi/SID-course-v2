@@ -165,3 +165,7 @@ D. Cung cấp thuật ngữ marketing.
     audience.\
 3.  **Thực hành mở rộng**: Lấy một prompt bạn thường dùng và kiểm tra
     xem đã đủ 5W-O chưa.
+
+---
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*

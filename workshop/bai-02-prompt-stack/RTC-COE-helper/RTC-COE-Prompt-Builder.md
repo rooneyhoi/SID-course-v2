@@ -849,3 +849,5 @@ Luôn ghi nhớ:
 ## Credit
 
 Nội dung được xây dựng theo phương pháp Structured Intelligence Design (SID) do Trương Đắc Bình phát triển.
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*

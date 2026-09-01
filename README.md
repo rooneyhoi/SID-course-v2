@@ -56,3 +56,7 @@ Sau đó mới:
 **bóc cây → mở rộng → chọn nhánh → reasoning → kiểm định → đóng thành framework.**
 
 > **SID = không hỏi AI cho ra câu trả lời hay hơn; mà thiết kế để AI cùng mình tạo ra cấu trúc tư duy tốt hơn.**
+
+---
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*

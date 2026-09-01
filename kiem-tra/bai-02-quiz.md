@@ -145,3 +145,5 @@ C. RTC-COE → Prompt → Prompt Stack → Task Decomposition
 D. Prompt → Prompt Stack → RTC-COE → Evaluation
 
 ---
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*

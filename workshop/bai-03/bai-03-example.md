@@ -282,3 +282,7 @@ Có muốn tôi:
 1. **Tạo Master Instruction** cho agent báo cáo tài chính dựa trên decomposition này?
 2. **Thiết kế Prompt Stack** cụ thể (6 phase)?
 3. **Viết test case** hoàn chỉnh cho từng stakeholder?
+
+---
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*

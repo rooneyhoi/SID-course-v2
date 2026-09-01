@@ -223,3 +223,5 @@ Nếu thiếu các phần này, project thường chỉ là “thiết kế đ�
 
 ---
 
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*
+

@@ -641,3 +641,5 @@ Sơ đồ này:
   - khi xử lý 1 yêu cầu duy nhất từ người dùng cuối.
 
 ---
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*

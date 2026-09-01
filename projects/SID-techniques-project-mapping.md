@@ -49,3 +49,7 @@ Dùng tài liệu này để trả lời ba câu hỏi:
 - Nếu project cần nghiên cứu sâu hoặc kiến trúc tri thức phức tạp, mới thêm Expansion.
 - Nếu project liên quan đến an toàn, chuyên môn nhạy cảm hoặc quyết định có rủi ro, nên ưu tiên Validation và Safety-bound reasoning.
 
+---
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*
+

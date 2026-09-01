@@ -418,3 +418,5 @@ Mục tiêu cuối cùng không phải tạo prompt hoàn hảo ngay lần đầ
 **Dựa trên:** Bài 2 — Prompt như Giao Diện Nhận Thức & Prompt Stack  
 **Tác giả:** Structured Intelligence Design (SID)
 
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*
+

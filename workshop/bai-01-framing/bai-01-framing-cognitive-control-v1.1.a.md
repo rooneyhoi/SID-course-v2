@@ -735,3 +735,7 @@ Nếu chưa thoải mái với câu nào:
 - dùng khung sáu câu hỏi để “phẫu thuật” prompt đó;
 - sửa đến khi người khác đọc vào cũng hiểu bạn thực sự cần gì.
 
+---
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*
+

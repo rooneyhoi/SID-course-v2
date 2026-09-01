@@ -132,3 +132,7 @@ Không chỉ vì nó làm lớp học sinh động hơn, mà vì nó:
 Nếu làm đều tay, đây sẽ trở thành một trong những điểm đặc sắc nhất của cả khóa học:  
 **mỗi buổi học bắt đầu bằng một vật thể/tình huống tưởng đơn giản, nhưng thực ra là một chiếc gương soi cấu trúc tư duy của người học.**
 
+---
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*
+

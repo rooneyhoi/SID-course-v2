@@ -1300,3 +1300,5 @@ Hãy làm rõ bài toán, bóc task, rồi thiết kế từng prompt cho đúng
 ---
 
 *Nội dung được xây dựng theo phương pháp Structured Intelligence Design (SID) do Trương Đắc Bình phát triển.*
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*

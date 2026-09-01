@@ -5,3 +5,7 @@ Tham khảo chi tiết tại URL này https://help.openai.com/en/articles/855439
 - Không có các file knowledge 
 - Chỉ có 1 instruction (master instruction)
 - Lưu ý về giới hạn độ dài của instruction (xem tài liệu trong link phía trên)
+
+---
+
+*SID Coach Pro v5.0 — Powered by Structured Intelligence Design Framework - Binh Truong*
