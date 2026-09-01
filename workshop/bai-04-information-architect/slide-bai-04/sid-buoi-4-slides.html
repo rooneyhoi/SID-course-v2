@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Buổi 4 — Kiến trúc thông tin và cách biểu diễn</title>
+<style>
+  :root{
+    --ink:#17243a;--muted:#647187;--paper:#f4f1e9;--white:#fff;
+    --blue:#2563eb;--teal:#098f8c;--coral:#e85d4a;--gold:#e9ad35;
+    --line:#d7deea;--soft:#eaf1ff;--mint:#e6f6f2;--warn:#fff0ec;
+    --shadow:0 18px 60px rgba(20,33,55,.16)
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#dfe6ef;font-family:"Aptos Display","Segoe UI",sans-serif;color:var(--ink)}
+  .deck{height:100%;display:grid;place-items:center}
+  .slide{display:none;position:relative;width:min(100vw,177.78vh);height:min(100vh,56.25vw);min-width:320px;overflow:hidden;background:var(--paper);padding:4.8% 5.8% 4.6%;box-shadow:var(--shadow)}
+  .slide.active{display:flex;flex-direction:column}.slide::after{content:"";position:absolute;right:-8%;bottom:-33%;width:31%;height:62%;border-radius:50%;background:rgba(37,99,235,.055);pointer-events:none}
+  .dark{background:#eef3fb;color:var(--ink)}.blue{background:#e7efff;color:var(--ink)}.teal{background:#e4f5f1;color:var(--ink)}
+  .eyebrow{font-size:clamp(11px,1vw,18px);letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--blue);margin-bottom:1.2%}.dark .eyebrow,.blue .eyebrow,.teal .eyebrow{color:#176f74}
+  h1{font-size:clamp(34px,4.9vw,82px);line-height:1.02;letter-spacing:-.04em;margin:0;max-width:92%}h2{font-size:clamp(26px,3.05vw,54px);line-height:1.08;letter-spacing:-.025em;margin:0 0 2%;max-width:96%}h3{font-size:clamp(17px,1.5vw,28px);line-height:1.16;margin:0 0 .55em}
+  p,li,td,th{font-size:clamp(13px,1.18vw,22px);line-height:1.37}p{margin:.25em 0 .72em}.lead{font-size:clamp(18px,1.82vw,32px);line-height:1.34;max-width:86%;color:var(--muted)}.dark .lead,.blue .lead,.teal .lead{color:#46566f}
+  .accent{color:var(--blue)}.hero{color:#087b78}.coral{color:var(--coral)}.gold{color:#9a6810}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:3%;align-items:stretch;flex:1}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:2.2%;align-items:stretch;flex:1}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:1.8%;align-items:stretch;flex:1}
+  .card{background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:14px;padding:4.2%;box-shadow:0 7px 24px rgba(20,33,55,.055)}.card.bad{border-top:7px solid var(--coral)}.card.good{border-top:7px solid var(--teal)}.card.bluecard{border-top:7px solid var(--blue)}
+  .before-after{display:grid;grid-template-columns:1fr 7% 1fr;gap:2%;align-items:stretch;flex:1}.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:4%;overflow:hidden}.panel.before{border-top:7px solid var(--coral);background:#fff8f6}.panel.after{border-top:7px solid var(--teal);background:#f3fbf9}.ba-arrow{display:grid;place-items:center;font-size:clamp(28px,4vw,68px);color:var(--blue)}
+  .tag{display:inline-block;border-radius:999px;padding:.3em .7em;font-size:clamp(10px,.85vw,15px);font-weight:850;text-transform:uppercase;letter-spacing:.08em;background:var(--warn);color:#a83d31;margin-bottom:.65em}.after .tag{background:var(--mint);color:#08706e}
+  .raw{font-family:Consolas,monospace;font-size:clamp(10px,.9vw,16px);line-height:1.45;color:#3d4b61;background:#fff;border:1px dashed #cbd3df;padding:3%;white-space:pre-line}.structured{font-size:clamp(11px,1vw,18px)}
+  .prompt{font-family:Consolas,monospace;font-size:clamp(10px,.91vw,16px);line-height:1.42;background:#fff;border:1px solid var(--line);border-left:7px solid var(--blue);border-radius:12px;padding:3%;color:#26364f;white-space:pre-line}.dark .prompt{background:#fff;color:#26364f;border-color:#cbd6e6;border-left-color:var(--blue)}
+  .quote{font-size:clamp(20px,2.15vw,38px);line-height:1.3;font-weight:750;max-width:88%;padding-left:3%;border-left:8px solid var(--gold)}
+  ul{margin:.1em 0;padding-left:1.15em}li{margin:.25em 0}li::marker{color:var(--blue)}
+  table{border-collapse:collapse;width:100%;background:#fff;border-radius:12px;overflow:hidden}th{background:var(--ink);color:#fff;text-align:left;padding:1.5% 1.7%}td{padding:1.3% 1.7%;border-bottom:1px solid var(--line);vertical-align:top}tr:last-child td{border-bottom:0}.small td,.small th{font-size:clamp(10px,.9vw,16px);padding:.85% 1.1%}
+  .flow{display:flex;align-items:center;justify-content:center;gap:1.1%;flex:1}.node{background:#fff;border:1px solid var(--line);border-radius:12px;padding:2% 1.3%;min-width:12%;text-align:center;font-size:clamp(11px,1vw,18px);font-weight:750;z-index:1}.node.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.node.tealn{background:var(--teal);color:#fff;border-color:var(--teal)}.node.warn{background:var(--coral);color:#fff;border-color:var(--coral)}.arrow{font-size:clamp(20px,2.7vw,46px);color:var(--blue)}
+  .pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:1.6%;align-items:center;flex:1}.pipe{background:#fff;border-top:6px solid var(--blue);border-radius:12px;padding:8% 6%;text-align:center}.pipe b{display:block;font-size:clamp(15px,1.3vw,23px);margin-bottom:.4em}.pipe span{font-size:clamp(10px,.88vw,16px);color:var(--muted)}
+  .metric{font-size:clamp(32px,4.6vw,78px);font-weight:900;line-height:1;color:var(--blue);letter-spacing:-.04em}.metric-label{font-size:clamp(11px,1vw,18px);color:var(--muted);margin-top:.5em}
+  .mini-tree{font-family:Consolas,monospace;font-size:clamp(9px,.82vw,15px);line-height:1.48;background:#fff;padding:3%;border:1px solid var(--line);border-radius:10px;white-space:pre-line}
+  .map{position:relative;height:100%;min-height:220px;background:#fff;border:1px solid var(--line);border-radius:12px}.map-node{position:absolute;padding:.65em .85em;border-radius:10px;background:var(--soft);border:2px solid var(--blue);font-size:clamp(9px,.82vw,15px);font-weight:750;text-align:center;z-index:2}.map-line{position:absolute;height:3px;background:#9aa9bf;transform-origin:left center;z-index:1}.map-label{position:absolute;font-size:clamp(8px,.7vw,12px);color:var(--muted);background:#fff;padding:0 .3em;z-index:3}
+  .exercise{background:#fff6df;color:var(--ink)}.exercise .eyebrow{color:#93620b}.timer{position:absolute;right:5.8%;top:5.3%;font-size:clamp(11px,.9vw,16px);color:#6f6042}.deliver{display:grid;grid-template-columns:repeat(3,1fr);gap:2%;margin-top:1%}.deliver div{background:#fff;color:var(--ink);border-radius:12px;padding:4%;font-size:clamp(12px,1.08vw,19px);font-weight:700}
+  .check{display:grid;grid-template-columns:repeat(2,1fr);gap:2.2%;margin-top:1%}.check div{background:#fff;color:var(--ink);border-radius:12px;padding:2.7%;font-size:clamp(12px,1.05vw,19px);font-weight:700}
+  .footer{position:absolute;left:5.8%;right:5.8%;bottom:2.1%;display:flex;justify-content:space-between;color:var(--muted);font-size:clamp(9px,.72vw,13px);z-index:3}.dark .footer,.blue .footer,.teal .footer,.exercise .footer{color:#607089}
+  .notes{display:none;position:absolute;left:5.8%;right:5.8%;bottom:6%;z-index:10;background:#111827;color:#fff;padding:1.7%;border-radius:10px;font-size:clamp(11px,.9vw,16px);box-shadow:var(--shadow)}body.show-notes .active .notes{display:block}
+  .progress{position:fixed;left:0;bottom:0;height:5px;background:var(--teal);transition:width .25s;z-index:20}.help{position:fixed;right:16px;top:14px;color:#607089;font-size:12px;opacity:.55;z-index:30}.overview{display:none;position:fixed;inset:0;z-index:50;background:#111827;padding:2%;overflow:auto;grid-template-columns:repeat(4,1fr);gap:14px}body.show-overview .overview{display:grid}.thumb{background:var(--paper);color:var(--ink);aspect-ratio:16/9;padding:7%;border-radius:8px;cursor:pointer;overflow:hidden;font-weight:800;font-size:clamp(10px,1vw,16px)}.thumb:hover{outline:4px solid var(--teal)}
+  @media(max-aspect-ratio:4/3){.help{display:none}.slide{padding:5.5%}.grid2{gap:2%}.panel{padding:3%}}
+  @media print{html,body{height:auto;overflow:visible;background:#fff}.deck{display:block}.slide{display:flex!important;page-break-after:always;width:13.333in;height:7.5in;box-shadow:none}.help,.progress,.overview{display:none!important}}
+</style>
+</head>
+<body>
+<div class="help">← → chuyển slide · F toàn màn hình · N ghi chú · O tổng quan</div>
+<main class="deck">
+
+<section class="slide dark active">
+  <div class="eyebrow">SID · Buổi 4</div>
+  <h1>Kiến trúc thông tin<br>và <span class="hero">cách biểu diễn</span></h1>
+  <p class="lead">Biến dữ liệu thô thành thông tin có cấu trúc, có thể hiểu, kiểm tra và ra quyết định</p>
+  <div class="footer"><span>Dữ liệu thô → Thông tin có cấu trúc → Kết quả hỗ trợ quyết định</span><span>01</span></div>
+  <aside class="notes">Mở đầu bằng lời hứa của buổi học: không tạo thêm thông tin, mà làm cho thông tin hiện có trở nên dùng được.</aside>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Cầu nối từ Buổi 3</div>
+  <h2>Đã có bản đồ tri thức, nhưng chưa chắc đã có <span class="accent">kết quả dùng được.</span></h2>
+  <div class="flow">
+    <div class="node primary">Định khung<br><small>xác định đúng bài toán</small></div><div class="arrow">→</div>
+    <div class="node">Chuỗi câu lệnh<br><small>xác định đúng tiến trình</small></div><div class="arrow">→</div>
+    <div class="node">Phân rã<br><small>xác định đủ thành phần</small></div><div class="arrow">→</div>
+    <div class="node tealn">Biểu diễn<br><small>chọn đúng hình thức</small></div>
+  </div>
+  <p class="lead">Buổi 3 trả lời “có những gì?”. Buổi 4 trả lời “nên biểu diễn chúng thế nào để làm việc tiếp?”.</p>
+  <div class="footer"><span>Cách biểu diễn là cầu nối giúp chuyển tri thức thành hành động</span><span>02</span></div>
+</section>
+
+<section class="slide teal">
+  <div class="eyebrow">Vấn đề thật</div>
+  <h1>Có dữ liệu<br><span class="hero">chưa có nghĩa là đã có nhận định hữu ích.</span></h1>
+  <div class="quote" style="margin-top:auto">Cùng một tập số liệu, kế toán cần truy vết; quản lý cần cảnh báo; Tổng giám đốc cần thông tin để quyết định.</div>
+  <div class="footer"><span>Vấn đề không chỉ nằm ở nội dung, mà còn nằm ở cách trình bày kết quả</span><span>03</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Tình huống xuyên suốt · Công ty Minh An Retail</div>
+  <h2>Trước khi cấu trúc: dữ liệu đúng nhưng <span class="coral">đang xuất hiện lẫn lộn</span></h2>
+  <div class="grid3">
+    <div class="card bad"><h3>Kết quả kinh doanh</h3><div class="raw">Doanh thu thuần: 3.380
+Lợi nhuận gộp: 1.284
+Lợi nhuận trước thuế: 436</div></div>
+  <div class="card bad"><h3>Vận hành</h3><div class="raw">Chi phí tiếp thị: 188
+Công nợ >60 ngày: 60
+Tồn kho: 1.340</div></div>
+    <div class="card bad"><h3>Dòng tiền</h3><div class="raw">Thu khách hàng: 3.180
+Mua thiết bị: -260
+Dòng tiền thuần: -43</div></div>
+  </div>
+  <p class="lead">Người đọc phải tự nhóm, tự so sánh, tự nối quan hệ và tự tìm bước tiếp theo.</p>
+  <div class="footer"><span>Nguồn: bai-04-sample-01.md · Đơn vị: triệu đồng</span><span>04</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Một prompt quen thuộc</div>
+  <h2>“Hãy phân tích dữ liệu và cho tôi những nhận định quan trọng”</h2>
+  <div class="grid2">
+    <div class="card bad"><h3>AI có thể trả về</h3><ul><li>Doanh thu tăng trưởng tích cực</li><li>Chi phí có xu hướng tăng</li><li>Cần quản lý dòng tiền</li><li>Nên tối ưu tồn kho</li></ul></div>
+    <div class="card bad"><h3>Nhưng chưa trả lời</h3><ul><li>Tăng so với mốc nào?</li><li>Khoản nào cần ưu tiên?</li><li>Dữ liệu nào tạo ra kết luận?</li><li>Ai làm gì tiếp theo?</li></ul></div>
+  </div>
+  <div class="footer"><span>AI không tự biết người đọc cần nhìn thông tin theo cách nào</span><span>05</span></div>
+</section>
+
+<section class="slide blue">
+  <div class="eyebrow">Giải pháp cốt lõi</div>
+  <h1>Chọn cách biểu diễn<br>theo <span class="hero">câu hỏi cần trả lời.</span></h1>
+  <div class="definition lead" style="margin-top:auto;color:var(--ink)">Không hỏi “trình bày đẹp thế nào?”. Hỏi “người đọc cần nhìn ra điều gì?”.</div>
+  <div class="footer"><span>Mỗi nhiệm vụ nhận thức cần một dạng biểu diễn phù hợp</span><span>06</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Bản đồ lựa chọn</div>
+  <h2>Sáu câu hỏi tương ứng với sáu dạng kết quả</h2>
+  <table class="small">
+    <thead><tr><th>Câu hỏi cần trả lời</th><th>Dạng biểu diễn</th><th>Kết quả giúp người đọc làm gì?</th></tr></thead>
+    <tbody>
+      <tr><td>Đối tượng này thuộc nhóm nào?</td><td><b>Taxonomy</b></td><td>Xác định dữ liệu thuộc phần nào của báo cáo</td></tr>
+      <tr><td>Nội dung này nằm trong phần lớn nào?</td><td><b>Hierarchy</b></td><td>Tạo mục lục và sắp xếp mạch đọc</td></tr>
+      <tr><td>Các lựa chọn khác nhau ra sao?</td><td><b>Table / Matrix</b></td><td>So sánh theo cùng tiêu chí để ra quyết định</td></tr>
+      <tr><td>Chỉ số này phụ thuộc vào dữ liệu nào?</td><td><b>Ontology Thinking</b></td><td>Kiểm tra điều kiện trước khi tính toán</td></tr>
+      <tr><td>Bước tiếp theo là gì?</td><td><b>Flowchart</b></td><td>Xác định thứ tự, điều kiện và người chịu trách nhiệm</td></tr>
+      <tr><td>Các khái niệm liên hệ theo cách nào?</td><td><b>Concept Map</b></td><td>Truy vết từ nguồn dữ liệu đến người sử dụng</td></tr>
+    </tbody>
+  </table>
+  <div class="footer"><span>Không có dạng biểu diễn tốt nhất cho mọi việc; chỉ có dạng phù hợp với câu hỏi đang xét</span><span>07</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Kỹ thuật 1 · Taxonomy</div>
+  <h2>Từ danh sách lẫn lộn đến <span class="accent">các nhóm được xác định theo một tiêu chí</span></h2>
+  <div class="before-after">
+    <div class="panel before"><span class="tag">Trước khi phân loại · Các nguồn đang lẫn lộn</span><div class="raw">Hóa đơn bán hàng
+Sao kê ngân hàng
+Bảng lương
+Tuổi nợ
+Phiếu nhập kho
+Hàng hoàn
+Chi phí tiếp thị</div><p>Người đọc chưa biết từng nguồn dữ liệu sẽ được dùng ở phần nào của báo cáo.</p></div>
+    <div class="ba-arrow">→</div>
+    <div class="panel after"><span class="tag">Sau khi phân loại · Dùng một tiêu chí thống nhất</span><table class="small"><tr><th>Nhóm</th><th>Thành phần</th></tr><tr><td>Doanh thu</td><td>Bán hàng, hàng hoàn</td></tr><tr><td>Chi phí</td><td>Lương, tiếp thị</td></tr><tr><td>Tiền</td><td>Sao kê ngân hàng</td></tr><tr><td>Công nợ</td><td>Tuổi nợ</td></tr><tr><td>Tồn kho</td><td>Phiếu nhập kho</td></tr></table><p>Mỗi nguồn dữ liệu đã có một vị trí và mục đích sử dụng rõ ràng.</p></div>
+  </div>
+  <div class="footer"><span>Taxonomy cho biết mỗi đối tượng thuộc nhóm nào và được xếp theo tiêu chí nào</span><span>08</span></div>
+</section>
+
+<section class="slide dark">
+  <div class="eyebrow">Câu lệnh thực hành · Tạo Taxonomy</div>
+  <h2>Ép AI nói rõ đối tượng, tiêu chí và mục đích</h2>
+  <div class="prompt">Đọc bai-04-sample-01.md.
+Phân loại từng bảng theo vai trò trong báo cáo: Doanh thu, Chi phí, Tiền, Công nợ, Tồn kho hoặc Kiểm soát dữ liệu.
+
+Trả về bảng: Nguồn dữ liệu | Nhóm chính | Lý do phân loại | Phần báo cáo sử dụng | SẴN SÀNG/CẦN LÀM RÕ.
+Mỗi nguồn chỉ có một nhóm chính. Không ép nhóm khi chưa đủ căn cứ.</div>
+  <div class="check"><div>✓ Một tiêu chí duy nhất?</div><div>✓ Nhóm cùng cấp?</div><div>✓ Có xử lý trường hợp mơ hồ?</div><div>✓ Nhóm giúp định tuyến?</div></div>
+  <div class="footer"><span>Câu lệnh tốt biến tiêu chí phân loại thành quy tắc có thể kiểm tra, không chỉ tạo danh sách đẹp</span><span>09</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Kỹ thuật 2 · Hierarchy</div>
+  <h2>Từ những ý rời rạc đến <span class="accent">mạch đọc được sắp xếp có chủ đích</span></h2>
+  <div class="before-after">
+    <div class="panel before"><span class="tag">Trước khi sắp xếp · Mọi ý đều nằm cùng một cấp</span><div class="raw">• Doanh thu
+• Điểm chưa xác minh
+• Tổng giám đốc
+• Công nợ
+• Lợi nhuận
+• Dòng tiền
+• Hành động
+• Nguồn dữ liệu</div><p>Người đọc không biết nội dung nào là phần chính, nội dung nào là phần chi tiết và nên đọc theo thứ tự nào.</p></div>
+    <div class="ba-arrow">→</div>
+    <div class="panel after"><span class="tag">Sau khi sắp xếp · Cấu trúc gồm ba tầng</span><div class="mini-tree">I. Tóm tắt điều hành
+  I.1 Kết quả nổi bật
+  I.2 Hành động đề xuất
+II. Kết quả kinh doanh
+  II.1 Doanh thu
+  II.2 Lợi nhuận
+III. Dòng tiền & rủi ro
+IV. Phụ lục kiểm soát
+  IV.1 Nguồn
+  IV.2 Chưa xác minh</div></div>
+  </div>
+  <div class="footer"><span>Hierarchy cho biết nội dung thuộc phần nào và người đọc nên tiếp cận theo thứ tự nào</span><span>10</span></div>
+</section>
+
+<section class="slide dark">
+  <div class="eyebrow">Câu lệnh thực hành · Tạo Hierarchy</div>
+  <h2>Thiết kế hợp đồng cấu trúc trước khi viết báo cáo</h2>
+  <div class="prompt">Đọc bai-04-sample-01.md.
+Tạo cấu trúc phân cấp gồm 3 tầng cho báo cáo quản trị tháng dành cho Tổng giám đốc; chưa viết nội dung.
+
+Có 5 mục cấp I: Tóm tắt, Kết quả kinh doanh, Dòng tiền, Rủi ro vận hành, Phụ lục kiểm soát.
+Mỗi mục có 2–4 mục cấp II. Ghi bảng nguồn sau từng mục. Đánh số theo I, I.1, I.1.1.</div>
+  <div class="grid3" style="margin-top:2%"><div class="card"><h3>Người đọc</h3><p>Tổng giám đốc cần thấy kết luận trước khi đọc chi tiết.</p></div><div class="card"><h3>Thứ tự trình bày</h3><p>Đi từ kết luận đến bằng chứng, rồi đến thông tin kiểm soát.</p></div><div class="card"><h3>Giới hạn nhiệm vụ</h3><p>Chỉ tạo mục lục; chưa viết nội dung và chưa bổ sung số liệu.</p></div></div>
+  <div class="footer"><span>Khi người đọc thay đổi, cấu trúc và thứ tự thông tin cũng phải thay đổi</span><span>11</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Kỹ thuật 3 · Table</div>
+  <h2>Từ những con số đứng riêng lẻ đến <span class="accent">phép so sánh có mốc đối chiếu</span></h2>
+  <div class="before-after">
+    <div class="panel before"><span class="tag">Trước khi so sánh · Các con số đứng riêng lẻ</span><div class="metric">436</div><div class="metric-label">Lợi nhuận trước thuế tháng 6</div><div class="metric" style="font-size:clamp(25px,3.5vw,58px);color:var(--coral);margin-top:.35em">−43</div><div class="metric-label">Dòng tiền thuần tháng 6</div><p>Con số có thể đúng nhưng chưa cho biết tình hình đang tốt lên hay xấu đi.</p></div>
+    <div class="ba-arrow">→</div>
+    <div class="panel after"><span class="tag">Sau khi so sánh · Có mốc đối chiếu rõ ràng</span><table class="small"><tr><th>Chỉ tiêu</th><th>Tháng 5</th><th>Tháng 6</th><th>Kế hoạch</th><th>Điều cần chú ý</th></tr><tr><td>Lợi nhuận trước thuế</td><td>485</td><td>436</td><td>587</td><td style="color:#b64234">Giảm 49; thấp hơn kế hoạch 151</td></tr><tr><td>Dòng tiền</td><td>305</td><td>-43</td><td>—</td><td style="color:#b64234">Chuyển từ dương sang âm</td></tr><tr><td>Doanh thu thuần</td><td>3.150</td><td>3.380</td><td>3.480</td><td>Tăng 230; thấp hơn kế hoạch 100</td></tr></table></div>
+  </div>
+  <div class="footer"><span>Table cho biết các chỉ tiêu khác nhau bao nhiêu khi được so sánh theo cùng một bộ tiêu chí</span><span>12</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Kỹ thuật 3 · Matrix</div>
+  <h2>Từ một báo cáo dùng chung đến <span class="accent">nội dung phù hợp với từng vai trò</span></h2>
+  <div class="before-after">
+    <div class="panel before"><span class="tag">Trước khi phân theo vai trò · Một báo cáo cho tất cả</span><h3>Một tệp báo cáo dài 30 trang</h3><ul><li>Tổng giám đốc bị quá tải vì quá nhiều chi tiết</li><li>Kế toán thiếu đường dẫn về nguồn số liệu</li><li>Quản lý khó nhận ra các cảnh báo quan trọng</li><li>Kiểm toán thiếu dấu vết để kiểm tra</li></ul></div>
+    <div class="ba-arrow">→</div>
+    <div class="panel after"><span class="tag">Sau khi phân theo vai trò · Ma trận hai chiều</span><table class="small"><tr><th>Nội dung</th><th>Kế toán</th><th>Tổng giám đốc</th><th>Kiểm toán</th></tr><tr><td>Mức độ chi tiết của số liệu</td><td>Đầy đủ</td><td>Chỉ số chính</td><td>Đầy đủ</td></tr><tr><td>Nhận định cần xem</td><td>Lỗi đối soát</td><td>Tác động kinh doanh</td><td>Sai lệch trọng yếu</td></tr><tr><td>Nguồn kiểm chứng</td><td>Liên kết trực tiếp</td><td>Không hiển thị</td><td>Bắt buộc</td></tr><tr><td>Hành động</td><td>Sửa số liệu</td><td>Chọn ưu tiên</td><td>Yêu cầu xác minh</td></tr></table></div>
+  </div>
+  <div class="footer"><span>Matrix cho biết mỗi nhóm người dùng cần loại nội dung nào và cần ở mức độ chi tiết ra sao</span><span>13</span></div>
+</section>
+
+<section class="slide dark">
+  <div class="eyebrow">Câu lệnh thực hành · Tạo Table và Matrix</div>
+  <h2>Thiết kế hàng và cột từ quyết định cần đưa ra</h2>
+  <div class="prompt">Đọc bai-04-sample-01.md. Tạo:
+1) Bảng so sánh tháng 6 với tháng 5 và kế hoạch tháng 6 cho 5 chỉ số quản trị chính; có chênh lệch và tín hiệu quản trị.
+2) Ma trận: hàng = Kinh doanh, Dòng tiền, Công nợ, Tồn kho, Kiểm soát; cột = Kế toán, Quản lý tài chính, Tổng giám đốc, Kiểm toán.
+
+Kiểm tra phép tính. Thiếu dữ liệu ghi “Chưa đủ dữ liệu”.</div>
+  <div class="quote" style="margin-top:2%">Trước khi chọn cột, hoàn thành câu: “Nhìn bảng này, tôi muốn quyết định ______.”</div>
+  <div class="footer"><span>Không có quyết định rõ → rất dễ tạo bảng “cho có”</span><span>14</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Kỹ thuật 4 · Ontology Thinking</div>
+  <h2>Từ danh sách thuật ngữ đến <span class="accent">các điều kiện phụ thuộc có thể kiểm tra</span></h2>
+  <div class="before-after">
+    <div class="panel before"><span class="tag">Trước khi xác định quan hệ · Chỉ mới có tên gọi</span><div class="raw">Doanh thu thuần
+Giá vốn hàng bán
+Lợi nhuận gộp
+Báo cáo KQKD
+Tổng giám đốc</div><p>Người đọc biết tên các thành phần nhưng chưa biết chỉ số được tạo từ dữ liệu nào, xuất hiện ở đâu và phục vụ ai.</p></div>
+    <div class="ba-arrow">→</div>
+    <div class="panel after"><span class="tag">Sau khi xác định quan hệ · Mỗi quan hệ có ý nghĩa rõ</span><div class="structured"><p><b>Chỉ số lợi nhuận gộp</b></p><p><b>Được tính từ:</b> Doanh thu thuần và giá vốn hàng bán.</p><p><b>Xuất hiện trong:</b> Báo cáo kết quả kinh doanh.</p><p><b>Được so sánh với:</b> Tháng 5 và kế hoạch tháng 6.</p><p><b>Được sử dụng bởi:</b> Quản lý tài chính và Tổng giám đốc.</p><p><b>Trạng thái:</b> Đã đủ dữ liệu để tính.</p></div></div>
+  </div>
+  <div class="footer"><span>Ontology Thinking cho biết mỗi thực thể có thuộc tính gì, phụ thuộc vào đâu và được sử dụng ở đâu</span><span>15</span></div>
+</section>
+
+<section class="slide dark">
+  <div class="eyebrow">Câu lệnh thực hành · Áp dụng Ontology Thinking</div>
+  <h2>Biến các điều kiện phụ thuộc thành quy tắc kiểm tra dữ liệu</h2>
+  <div class="prompt">Mô hình hóa 8–12 thực thể từ dữ liệu mẫu 01. Với mỗi thực thể, nêu rõ:
+Tên thực thể | Thuộc tính | Dữ liệu phụ thuộc | Kết quả đóng góp | Báo cáo xuất hiện | Người sử dụng.
+
+Bắt buộc có Doanh thu thuần, Giá vốn, Lợi nhuận gộp, Dòng tiền thuần, Công nợ quá hạn, Tồn kho.
+Sau đó tạo bảng kiểm tra: Chỉ số | Dữ liệu bắt buộc | SẴN SÀNG/CHƯA THỂ XỬ LÝ | Lý do.</div>
+  <div class="flow" style="margin-top:1%"><div class="node">Doanh thu<br>thuần</div><div class="arrow">+</div><div class="node">Giá vốn</div><div class="arrow">→</div><div class="node tealn">Lợi nhuận<br>gộp</div><div class="arrow">→</div><div class="node primary">Báo cáo<br>KQKD</div></div>
+  <div class="footer"><span>Nếu thiếu dữ liệu bắt buộc, phải dừng xử lý và nêu rõ phần cần bổ sung; không được tự ước lượng</span><span>16</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Kỹ thuật 5 · Flowchart</div>
+  <h2>Từ danh sách công việc đến <span class="accent">quy trình có thứ tự và điều kiện rẽ nhánh</span></h2>
+  <div class="before-after">
+    <div class="panel before"><span class="tag">Trước khi sắp xếp · Danh sách chưa có thứ tự</span><div class="raw">□ Nhận dữ liệu
+□ Tính chỉ số
+□ Xác minh
+□ Viết báo cáo
+□ Phê duyệt
+□ Phát hành</div><p>Không có điều kiện dừng hay quay lại.</p></div>
+    <div class="ba-arrow">→</div>
+    <div class="panel after"><span class="tag">Sau khi sắp xếp · Quy trình có điểm kiểm soát</span><div class="mini-tree">Nhận dữ liệu
+  ↓
+Đủ dữ liệu? ─ Không → Bổ sung ↩
+  Có
+  ↓
+Đối soát đúng? ─ Không → Xác minh ↩
+  Có
+  ↓
+Tạo báo cáo → Phê duyệt?
+  Chưa → Chỉnh sửa ↩
+  Có → Phát hành</div></div>
+  </div>
+  <div class="footer"><span>Flowchart cho biết phải làm bước nào tiếp theo và điều kiện nào quyết định hướng xử lý</span><span>17</span></div>
+</section>
+
+<section class="slide dark">
+  <div class="eyebrow">Câu lệnh thực hành · Tạo Flowchart</div>
+  <h2>Đưa các điểm kiểm soát vào quy trình làm việc của AI</h2>
+  <div class="prompt">Dùng Mermaid để tạo sơ đồ quy trình lập báo cáo từ dữ liệu mẫu 01.
+Có 8–14 bước hành động, ít nhất 3 điểm rẽ nhánh, nhánh xử lý dữ liệu thiếu, nhánh xử lý sai lệch, bước kế toán xác minh và bước người có thẩm quyền phê duyệt.
+
+Sau sơ đồ, tạo bảng: Điểm cần quyết định | Khi điều kiện được đáp ứng | Khi điều kiện không được đáp ứng | Người chịu trách nhiệm.
+AI không được tự phê duyệt.</div>
+  <div class="grid3" style="margin-top:2%"><div class="card bad"><h3>Chưa thể xử lý</h3><p>Quy trình đang thiếu dữ liệu bắt buộc và phải dừng để bổ sung.</p></div><div class="card bluecard"><h3>Sẵn sàng xử lý</h3><p>Dữ liệu đã đáp ứng điều kiện để chuyển sang bước tiếp theo.</p></div><div class="card good"><h3>Đang chờ phê duyệt</h3><p>Con người có thẩm quyền phải đưa ra quyết định trước khi tiếp tục.</p></div></div>
+  <div class="footer"><span>Mỗi điểm rẽ nhánh phải nêu rõ điều kiện kiểm tra và người chịu trách nhiệm quyết định</span><span>18</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Kỹ thuật 6 · Concept Map</div>
+  <h2>Từ những dữ kiện rời rạc đến <span class="accent">mạng lưới quan hệ được giải thích rõ</span></h2>
+  <div class="before-after">
+    <div class="panel before"><span class="tag">Trước khi kết nối · Các dữ kiện đứng riêng lẻ</span><div class="raw">Doanh thu tăng 230
+Dòng tiền âm 43
+Mua thiết bị 260
+Tổng giám đốc cần bản tóm tắt
+Nợ quá hạn >60 ngày: 60</div><p>Chưa truy được từ nguồn đến người ra quyết định.</p></div>
+    <div class="ba-arrow">→</div>
+    <div class="panel after"><span class="tag">Sau khi kết nối · Mỗi mũi tên tạo thành một câu có nghĩa</span><div class="mini-tree">Dữ liệu bán hàng ─được dùng để tính→ Doanh thu
+  Doanh thu ─được trình bày trong→ Báo cáo kết quả kinh doanh
+  Báo cáo kết quả kinh doanh ─được tóm tắt trong→ Bản tóm tắt điều hành
+  Bản tóm tắt điều hành ─giúp ra quyết định cho→ Tổng giám đốc
+
+  Sao kê ngân hàng ─cung cấp số liệu để tính→ Dòng tiền
+  Chi mua thiết bị ─làm giảm→ Dòng tiền thuần
+  Dòng tiền âm ─tạo tín hiệu cảnh báo về→ Rủi ro thiếu tiền mặt</div></div>
+  </div>
+  <div class="footer"><span>Concept Map cho biết các thành phần liên hệ với nhau như thế nào và vì sao mối liên hệ đó quan trọng</span><span>19</span></div>
+</section>
+
+<section class="slide dark">
+  <div class="eyebrow">Câu lệnh thực hành · Tạo Concept Map</div>
+  <h2>Thể hiện ý nghĩa của quan hệ, không biến bản đồ thành chuỗi bước</h2>
+  <div class="prompt">Dùng Mermaid để tạo bản đồ khái niệm từ dữ liệu mẫu 01, nối:
+Nguồn dữ liệu → Chỉ số → Rủi ro hoặc nhận định → Người sử dụng.
+
+Có 12–20 khái niệm hoặc thực thể và ít nhất 4 loại quan hệ được gọi tên rõ. Phải truy vết được từ dữ liệu bán hàng đến Tổng giám đốc và từ sao kê ngân hàng đến rủi ro dòng tiền. Không suy đoán nguyên nhân. Không biến bản đồ thành chuỗi bước tuần tự.</div>
+  <div class="grid2" style="margin-top:2%"><div class="card good"><h3>Concept Map có ý nghĩa</h3><p>Mỗi mũi tên phải đọc được thành một câu hoàn chỉnh, chẳng hạn: “Dữ liệu bán hàng được dùng để tính doanh thu” hoặc “Báo cáo này giúp Tổng giám đốc ra quyết định”.</p></div><div class="card bad"><h3>Không mô tả thứ tự công việc</h3><p>Không dùng “Bước 1 → Bước 2 → Bước 3” làm logic chính, vì đó là chức năng của Flowchart.</p></div></div>
+  <div class="footer"><span>Mỗi đường nối phải nói rõ “liên hệ theo cách gì”</span><span>20</span></div>
+</section>
+
+<section class="slide blue">
+  <div class="eyebrow">Ghép các kỹ thuật</div>
+  <h1>Mỗi dạng biểu diễn<br>giải quyết một <span class="hero">vướng mắc khác nhau.</span></h1>
+  <div class="pipeline" style="margin-top:4%"><div class="pipe"><b>Taxonomy</b><span>Xác định dữ liệu thuộc phần nào</span></div><div class="pipe"><b>Hierarchy</b><span>Sắp xếp nội dung theo mạch đọc</span></div><div class="pipe"><b>Table / Matrix</b><span>So sánh theo cùng tiêu chí</span></div><div class="pipe"><b>Flowchart</b><span>Xác định bước và điều kiện</span></div><div class="pipe"><b>Concept Map</b><span>Truy vết các mối quan hệ</span></div></div>
+  <div class="footer"><span>Không cần đưa mọi dạng biểu diễn vào mọi kết quả; hãy chọn theo nhiệm vụ người đọc cần thực hiện</span><span>21</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Kết quả sau khi cấu trúc · Thông tin hỗ trợ quyết định</div>
+  <h2>Cùng dữ liệu thô, giờ đã thành <span class="accent">thông tin có thể hành động</span></h2>
+  <div class="grid2">
+    <div class="card good"><h3>Ba tín hiệu có cấu trúc</h3><ul><li>Doanh thu thuần tăng 230 nhưng thấp hơn kế hoạch 100</li><li>Lợi nhuận trước thuế giảm 49 và thấp hơn kế hoạch 151</li><li>Dòng tiền chuyển từ dương 305 sang âm 43</li></ul></div>
+    <div class="card bluecard"><h3>Ba hành động có người chịu trách nhiệm</h3><ul><li>Quản lý tài chính giải thích nguyên nhân chênh lệch lợi nhuận</li><li>Kế toán xác minh 60 triệu đồng công nợ quá hạn</li><li>Tổng giám đốc quyết định ưu tiên tiền mặt và tồn kho</li></ul></div>
+  </div>
+  <p class="lead">Kết quả sau khi cấu trúc không chỉ đẹp hơn. Quan trọng hơn, nó <b>giảm công sức suy luận và giúp người đọc biết cần làm gì tiếp theo</b>.</p>
+  <div class="footer"><span>Kết quả có cấu trúc gồm kết luận, bằng chứng, người chịu trách nhiệm và hành động tiếp theo</span><span>22</span></div>
+</section>
+
+<section class="slide exercise">
+  <div class="eyebrow">Thực hành tại lớp</div><div class="timer">4 bài · 35 phút</div>
+  <h2>Viết câu lệnh, xem kết quả và tự điều chỉnh</h2>
+  <div class="grid4">
+    <div class="card"><h3>1 · Taxonomy</h3><p>Phân loại các bảng dữ liệu theo một tiêu chí thống nhất.</p></div>
+    <div class="card"><h3>2 · Hierarchy</h3><p>Tạo mục lục 3 tầng cho Tổng giám đốc hoặc kế toán.</p></div>
+    <div class="card"><h3>3 · Table / Matrix</h3><p>Thiết kế bảng giúp người đọc đưa ra một quyết định cụ thể.</p></div>
+    <div class="card"><h3>4 · Flowchart và Concept Map</h3><p>Tạo hai sơ đồ với hai chức năng khác nhau.</p></div>
+  </div>
+  <div class="deliver"><div>A · Câu lệnh do học viên tự viết</div><div>B · Kết quả do AI tạo ra</div><div>C · 3–5 ý tự đánh giá và sửa câu lệnh</div></div>
+  <div class="footer"><span>Dữ liệu: bai-04-sample-01.md</span><span>23</span></div>
+</section>
+
+<section class="slide teal">
+  <div class="eyebrow">Bài tập cuối Buổi 4</div>
+  <h1>Từ dữ liệu trường học<br>đến <span class="hero">một báo cáo hoàn chỉnh.</span></h1>
+  <div class="definition lead" style="margin-top:auto;color:var(--ink)">Viết một câu lệnh tổng hợp, dùng dữ liệu mẫu 02 để tạo báo cáo dành cho Ban giám hiệu.</div>
+  <div class="footer"><span>Dữ liệu đầu vào: bai-04-sample-02.md · Báo cáo cần tạo: report.md</span><span>24</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Yêu cầu đối với sản phẩm cuối buổi</div>
+  <h2>Một báo cáo gồm bảy phần phối hợp với nhau</h2>
+  <div class="grid3">
+    <div class="card bluecard"><h3>1 · Tóm tắt</h3><p>Trình bày 5–8 ý về kết quả, rủi ro và nội dung cần ưu tiên.</p></div>
+    <div class="card bluecard"><h3>2 · Các yếu tố liên quan</h3><p>Phân nhóm các yếu tố và phân tích kết quả theo từng môn.</p></div>
+    <div class="card bluecard"><h3>3 · Concept Map</h3><p>Nối thời gian, biện pháp can thiệp, hành vi học tập và kết quả.</p></div>
+    <div class="card good"><h3>4 · Flowchart</h3><p>Thể hiện các bước kiểm tra, xác minh và phê duyệt.</p></div>
+    <div class="card good"><h3>5 · Bảng tổng kết</h3><p>Tóm tắt thành tích cùng những môn và lớp cần chú ý.</p></div>
+    <div class="card good"><h3>6–7 · Hành động và giới hạn</h3><p>Đề xuất hành động có căn cứ và nêu rõ điều chưa thể kết luận.</p></div>
+  </div>
+  <div class="footer"><span>Đáp án tham khảo: report.md — chỉ mở sau phiên bản đầu</span><span>25</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Nguyên tắc kiểm soát độ tin cậy</div>
+  <h2>Có cấu trúc vẫn chưa đủ; kết quả còn phải <span class="coral">đúng và trung thực</span></h2>
+  <div class="check">
+    <div>✓ Mọi con số có thể truy ngược về bảng dữ liệu nguồn?</div><div>✓ Không cộng trùng học sinh dưới 5 điểm ở nhiều môn?</div>
+    <div>✓ “Có liên hệ” không bị viết thành “gây ra”?</div><div>✓ Thiếu dữ liệu được nói rõ?</div>
+    <div>✓ Flowchart có điểm rẽ nhánh và người chịu trách nhiệm?</div><div>✓ Mỗi mũi tên trong Concept Map có diễn đạt quan hệ đủ nghĩa?</div>
+  </div>
+  <p class="lead" style="margin-top:2%">Kiến trúc thông tin tốt phải giúp người đọc nhìn thấy giới hạn của dữ liệu, thay vì che giấu những giới hạn đó.</p>
+  <div class="footer"><span>Kiểm soát độ tin cậy là một phần bắt buộc khi thiết kế kết quả do AI tạo ra</span><span>26</span></div>
+</section>
+
+<section class="slide dark">
+  <div class="eyebrow">Nói ngắn gọn</div>
+  <h1>Dữ liệu không tự<br><span class="hero">trở thành quyết định.</span></h1>
+  <div class="definition lead" style="margin-top:auto;color:var(--ink)">Bạn phải chọn đúng cấu trúc để người đọc thấy được nhóm, thứ tự, so sánh, phụ thuộc, quy trình và quan hệ.</div>
+  <div class="footer"><span>Buổi 4 giúp bạn thiết kế cách tổ chức tư duy và hình thức trình bày kết quả của AI</span><span>27</span></div>
+</section>
+
+</main>
+<div class="progress"></div>
+<div class="overview" aria-label="Tổng quan slide"></div>
+<script>
+(() => {
+  const slides = [...document.querySelectorAll(".slide")];
+  const bar = document.querySelector(".progress");
+  const overview = document.querySelector(".overview");
+  let current = 0;
+
+  slides.forEach((slide, index) => {
+    const thumb = document.createElement("button");
+    thumb.className = "thumb";
+    thumb.type = "button";
+    const title = slide.querySelector("h1,h2");
+    thumb.textContent = `${index + 1}. ${title ? title.textContent.trim() : "Slide"}`;
+    thumb.addEventListener("click", () => {
+      document.body.classList.remove("show-overview");
+      show(index);
+    });
+    overview.appendChild(thumb);
+  });
+
+  function show(index) {
+    current = Math.max(0, Math.min(slides.length - 1, index));
+    slides.forEach((slide, slideIndex) => slide.classList.toggle("active", slideIndex === current));
+    bar.style.width = `${((current + 1) / slides.length) * 100}%`;
+    history.replaceState(null, "", `#${current + 1}`);
+  }
+
+  function fullscreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "ArrowRight" || event.key === " " || event.key === "PageDown") show(current + 1);
+    if (event.key === "ArrowLeft" || event.key === "PageUp") show(current - 1);
+    if (event.key === "Home") show(0);
+    if (event.key === "End") show(slides.length - 1);
+    if (event.key.toLowerCase() === "f") fullscreen();
+    if (event.key.toLowerCase() === "n") document.body.classList.toggle("show-notes");
+    if (event.key.toLowerCase() === "o") document.body.classList.toggle("show-overview");
+    if (event.key === "Escape") document.body.classList.remove("show-overview", "show-notes");
+  });
+
+  let startX = 0;
+  document.addEventListener("touchstart", event => startX = event.changedTouches[0].screenX, {passive:true});
+  document.addEventListener("touchend", event => {
+    const delta = event.changedTouches[0].screenX - startX;
+    if (Math.abs(delta) > 45) show(current + (delta < 0 ? 1 : -1));
+  }, {passive:true});
+
+  const hashIndex = Number(location.hash.slice(1)) - 1;
+  show(Number.isFinite(hashIndex) && hashIndex >= 0 ? hashIndex : 0);
+})();
+</script>
+</body>
+</html>
