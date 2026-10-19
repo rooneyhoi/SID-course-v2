@@ -1,0 +1,77 @@
+Agent -> như nhân viên, tự làm việc theo yêu cầu + qui định + công cụ + tri thức
+Skill -> là 1 kỹ năng, dùng đi dùng lại, có thể dùng bởi nhân viên, hoặc bởi user (chính mình)
+KB -> Knowledge base -> kho tri thức
+
+
+KB -> nấu cơm
+- các loại gạo
+- các loại cơm
+- các món ăn đi kèm
+- cơm phù hợp với sức khỏe nào
+- nghệ thuật ăn cơm (Ý, Hàn, Việt, Trung Quốc)
+- đặc tính tinh bột, đường (liên quan tới bệnh nền, dị ứng)
+=> Nếu nhiều -> RAG
+
+
+Skill
+skill - vo gao
+- đong gạo
+- vo gạo
+-> KB về các loại gạo
+
+skill - nau com
+- input: người nước nào? món cơm cho ai.
+- cho vào nồi
+- chọn chế độ, bấm nút
+- kiểm tra cơm chin
+-> tham khao KB ve món cơm phù hợp, KB về loại cơm
+
+
+Agent
+- là đầu bếp
+- tools: nồi cơm điện, ổ cắm, thì xúc cơm, giá vo gạo, bơ đong gạo
+- skills: skill-vo-gao, skill-nau-com, skill-kiem-tra-com
+
+- routing: bạn là ai? người nước nào? mấy tuổi (5 tuổi thì gọi bố mẹ ra đây), muốn ăn món gì
+-- nhỏ tuổi: gọi bố mẹ, từ chối
+-- già: gọi con cái
+-- dị ứng: lưu ý loại gạo (nhiều/ít tinh bột, Carbonhydrat)
+
+- rules
+-- OOS: không hướng dẫn rang cơm, luộc rau, chế biến các món khác
+-- Quy trình: 1 đong gạo, 2 vo gạo (checkpoint: nhặt sạn, dị vật), 3 nấu cơm, 4 kiểm tra, 5 xác thực chín (chín vừa, chín và để lâu 1h, v.v..)
+-- v.v..
+Jev -> make decision nhanh (Jev + LLM)
+
+Checkpoint (theo từng bước) - fail -> rollback hoặc yêu cầu loop lại luôn
+- thế nào là đủ gạo cho 3 người ăn - tính bằng bơ gạo hay gram
+- thế nào là cơm chín, thế nào là cơm cháy, cơm khê, nhão...
+- v.v..
+
+- output (few shots example)
+- test case
+
+
+
+Nhiều Agent -> tools -> RAG, dịch vụ bên ngoài (mail, bank,v.v.) -> Harness (Hermes, Antigravity)
+Agents -> agent A làm việc-> Agent B kiểm tra (chưa đạt) -> từ chối -> A phải làm lại -> Loop
+
+
+Prompt review dự án bằng SID v2
+1 là để chung folder SID v2 và folder dự án cùng thư mục gốc
+2 là prompt: Dùng tri thức trong SID v2 để review dự án [tên dự án] rồi ghi ra file output SID-v2-review-report.md
+3 xem lại report và phản biện
+
+Lưu ý:
+- Tập trung vào routing, rules, checkpoint
+- Sau cùng là xây dựng test case
+- Cần có routing để định vị 2 thứ: hội thoại, và tính năng rẽ nhánh theo yêu cầu và đối tượng sử dụng
+- Framing brief nên làm kỹ, và cho ra 1 file riêng framing-brief.md -> mô tả rõ
+	+ bài toán là gì
+	+ giải quyết cho ai
+	+ OOS là gì (out of scope)
+
+
+
+
+
