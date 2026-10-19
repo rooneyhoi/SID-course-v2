@@ -580,3 +580,5 @@ Framing Brief
 ```
 
 Cấu trúc này giúp biến việc thiết kế prompt hoặc Agent thành một quy trình engineering có phạm vi, trạng thái, quyền hạn, tiêu chí kiểm tra và cách xử lý lỗi rõ ràng.
+
+*Review thực hiện theo SID-course-v2 (SID Coach Pro v5.0 — Structured Intelligence Design). by Binh Truong*
